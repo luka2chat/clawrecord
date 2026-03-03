@@ -1,0 +1,79 @@
+{
+  "collection_timestamp": "2026-03-03T16:14:24.395622Z",
+  "daily": {
+    "2026-03-02": {
+      "sessions": 2,
+      "messages": {
+        "user": 10,
+        "assistant": 28
+      },
+      "tool_calls": {
+        "read": 2,
+        "exec": 11,
+        "process": 3
+      },
+      "tool_calls_total": 16,
+      "tool_errors": 0,
+      "tokens": {
+        "input": 94885,
+        "output": 14570,
+        "total": 394507
+      },
+      "cost": 0.017951,
+      "skills_used": [
+        "coding"
+      ],
+      "channels": [
+        "telegram",
+        "webchat"
+      ],
+      "models": [
+        "bytedance-seed/seed-2.0-mini",
+        "delivery-mirror",
+        "gateway-injected",
+        "google/gemini-2.5-flash"
+      ],
+      "hours_active": [
+        11,
+        12,
+        13,
+        14,
+        15
+      ],
+      "max_turns_in_session": 5,
+      "commands": 1,
+      "first_message_at": "2026-03-02T11:53:34.740Z",
+      "last_message_at": "2026-03-02T15:07:59.494Z"
+    }
+  },
+  "totals": {
+    "sessions": 2,
+    "messages_user": 10,
+    "messages_assistant": 28,
+    "tool_calls_total": 16,
+    "tool_errors_total": 0,
+    "tokens_total": 394507,
+    "cost_total": 0.017951,
+    "unique_skills": [
+      "coding"
+    ],
+    "unique_tools": [
+      "exec",
+      "process",
+      "read"
+    ],
+    "unique_models": [
+      "bytedance-seed/seed-2.0-mini",
+      "delivery-mirror",
+      "gateway-injected",
+      "google/gemini-2.5-flash"
+    ],
+    "unique_channels": [
+      "telegram",
+      "webchat"
+    ],
+    "active_days": 1,
+    "first_activity": "2026-03-02",
+    "last_activity": "2026-03-02"
+  }
+}

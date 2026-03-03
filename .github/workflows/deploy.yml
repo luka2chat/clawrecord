@@ -1,11 +1,10 @@
-name: Deploy ClawRecord to GitHub Pages
+name: ClawRecord Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # Daily at midnight UTC
   workflow_dispatch:
 
 permissions:
@@ -25,9 +24,22 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Generate Static Pages
+      # If data/raw/metrics.json already exists (committed locally),
+      # skip collect step. Otherwise try to collect (will gracefully
+      # handle missing OpenClaw data in CI).
+      - name: Score
         run: |
-          python3 scripts/generate_pages.py
+          if [ -f data/raw/metrics.json ]; then
+            echo "Using existing metrics.json"
+          else
+            echo "No metrics.json found — generating empty placeholder"
+            mkdir -p data/raw
+            echo '{"collection_timestamp":"","daily":{},"totals":{"sessions":0,"messages_user":0,"messages_assistant":0,"tool_calls_total":0,"tool_errors_total":0,"tokens_total":0,"cost_total":0,"unique_skills":[],"unique_tools":[],"unique_models":[],"unique_channels":[],"active_days":0,"first_activity":null,"last_activity":null}}' > data/raw/metrics.json
+          fi
+          python3 scripts/score.py
+
+      - name: Generate Dashboard
+        run: python3 scripts/generate_pages.py
 
       - name: Setup Pages
         uses: actions/configure-pages@v4

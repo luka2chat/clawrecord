@@ -1,25 +1,58 @@
 {
   "username": "luka2chat",
   "level": 1,
-  "xp": 150,
+  "xp": 201,
   "xp_to_next_level": 500,
-  "streak": 5,
-  "hp": 80,
+  "weekly_xp": 201,
+  "streak": 1,
+  "streak_freezes": 0,
+  "hp": 100,
   "max_hp": 100,
-  "rank": "新手驯兽师",
+  "rank": "Novice Tamer",
+  "avatar": "🥚",
+  "league": {
+    "id": "bronze",
+    "icon": "🟤"
+  },
   "badges": [
     {
-      "id": "first_email",
-      "name": "第一次让 AI 发邮件",
-      "icon": "📧",
-      "date": "2026-03-01"
+      "id": "first_session",
+      "name": "First Steps",
+      "icon": "👣",
+      "date": "2026-03-03"
+    },
+    {
+      "id": "first_tool",
+      "name": "Tool User",
+      "icon": "🔧",
+      "date": "2026-03-03"
+    },
+    {
+      "id": "first_telegram",
+      "name": "Telegram Pioneer",
+      "icon": "📱",
+      "date": "2026-03-03"
+    },
+    {
+      "id": "multi_channel",
+      "name": "Multi-Channel",
+      "icon": "📡",
+      "date": "2026-03-03"
+    },
+    {
+      "id": "model_explorer",
+      "name": "Model Explorer",
+      "icon": "🔬",
+      "date": "2026-03-03"
     }
   ],
   "skills": {
-    "email_management": 2,
-    "schedule_management": 1,
-    "coding_assistant": 3,
-    "data_analysis": 0
+    "coding": 0,
+    "content": 0,
+    "research": 0,
+    "communication": 0,
+    "automation": 0,
+    "data": 0
   },
-  "last_check_in": "2026-03-03"
+  "last_check_in": "2026-03-02"
 }

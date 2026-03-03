@@ -1,35 +1,67 @@
-# 🤖 ClawRecord
+# ClawRecord
 
 [English](./README.md) | [简体中文](./README_CN.md)
 
-> OpenClaw 游戏化记录系统 - 追踪您的 AI 驯兽师之旅。
+> OpenClaw 游戏化记录系统 — 为你的 AI 助手打造的多邻国。
 
-ClawRecord 是一个受多邻国（Duolingo）启发的记录系统，专门用于追踪和游戏化您使用 **OpenClaw**（开源 AI 个人助理）的过程。
+ClawRecord 自动追踪你的 [OpenClaw](https://github.com/openclaw/openclaw) 使用数据，将其转化为游戏化体验：经验值、等级、成就、技能树、连续打卡、联赛和全球排行榜。
 
-## 🌟 核心功能
+**你的 AI 在成长，勋章属于你。无法作弊。**
 
-- **🔥 每日打卡 Streak**：保持连续使用，积累连胜。
-- **📈 XP 经验值**：完成不同难度的任务获得 XP。
-- **🛡️ 等级系统**：从“新手驯兽师”进化到“AI 领主”。
-- **🏆 成就徽章**：解锁里程碑成就。
-- **🎯 技能树**：在邮件管理、编程辅助等领域提升技能。
-- **❤️ 生命值/挑战**：设定每周目标，保持动力。
-- **📊 贡献热力图**：直观展示您的 AI 使用频率。
-- **🌍 多语言支持**：支持英文和中文（i18n）。
+## 功能
 
-## 🛠️ 技术方案
+- **自动数据采集** — Hook + 会话解析器从 OpenClaw 运行时提取指标
+- **XP 系统** — 通过消息、工具调用、多轮对话、技能多样性获得 XP
+- **等级与进化** — 从新手驯兽师（🥚）进化到 AI 领主（👑）
+- **47 项成就** — 里程碑、连续打卡、技能、工具、效率、时间、特殊成就
+- **6 大技能树** — 编程、内容创作、研究调查、通信协作、自动化、数据分析
+- **打卡与生命值** — 每日 Streak + 冻结保护 + HP 衰减机制
+- **联赛系统** — 青铜 → 白银 → 黄金 → 钻石 → 黑曜石（按周 XP 排名）
+- **活动热力图** — 90 天可视化活动记录
+- **全球排行榜** — 基于 GitHub 的去中心化方案，零基础设施成本
+- **多语言** — 支持中英文
 
-- **数据存储**：`/data` 目录下的 JSON 文件。
-- **页面生成**：Python 脚本 `scripts/generate_pages.py`。
-- **自动化**：GitHub Actions 每天定时构建。
-- **部署**：GitHub Pages 免费托管。
+## 架构
 
-## 🚀 如何记录新任务
+```
+OpenClaw 运行时 → Hook（实时）→ collect.py → score.py → generate_pages.py → GitHub Pages
+                  会话 JSONL ──↗                ↓
+                                       public_profile.json → 全球 Registry → 排行榜
+```
 
-1. 编辑 `data/tasks.json` 添加新任务。
-2. 编辑 `data/check_ins.json` 更新打卡状态。
-3. 编辑 `data/user_stats.json` 更新 XP 和等级。
-4. 提交并推送代码，GitHub Actions 会自动更新页面。
+## 快速开始
+
+### 1. 安装 Hook
+
+```bash
+cp -r hooks/clawrecord-hook ~/.openclaw/hooks/
+openclaw hooks enable clawrecord-hook
+openclaw gateway restart
+```
+
+### 2. 采集与计分
+
+```bash
+python3 scripts/collect.py         # 解析 OpenClaw 数据 → data/raw/metrics.json
+python3 scripts/score.py           # 计算 XP、等级、成就 → data/*.json
+python3 scripts/generate_pages.py  # 生成看板 → docs/
+```
+
+### 3. 部署
+
+推送到 GitHub，Action 每天自动运行流水线并部署到 Pages。
+
+### 4. 加入全球排行榜
+
+向 [clawrecord-leaderboard](https://github.com/luka2chat/clawrecord-leaderboard) 提交 PR 注册你的仓库。
+
+## 防作弊机制
+
+- 所有 XP 均从经过验证的 OpenClaw 运行时日志计算
+- `data/raw/` 由机器生成 — 手动编辑会被流水线忽略
+- `public_profile.json` 包含 SHA-256 签名用于完整性验证
+- 全球 Registry 检查 XP 增长速率异常
 
 ---
+
 Powered by OpenClaw & GitHub Actions

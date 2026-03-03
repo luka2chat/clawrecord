@@ -1,0 +1,26 @@
+{
+  "username": "luka2chat",
+  "level": 1,
+  "xp": 201,
+  "weekly_xp": 201,
+  "streak": 1,
+  "badge_count": 5,
+  "top_skills": [
+    {
+      "id": "coding",
+      "level": 0
+    },
+    {
+      "id": "content",
+      "level": 0
+    },
+    {
+      "id": "research",
+      "level": 0
+    }
+  ],
+  "league": "bronze",
+  "avatar": "🥚",
+  "last_updated": "2026-03-03T16:14:24.523129Z",
+  "signature": "sha256:13c8a52721b0d0a82bfe92d82161ec0861da9fecd0b33e53e56bbb1435381459"
+}

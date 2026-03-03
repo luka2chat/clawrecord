@@ -1,7 +1,7 @@
 {
-  "2026-02-27": {"checked": true, "tasks_count": 3, "xp_gained": 150},
-  "2026-02-28": {"checked": true, "tasks_count": 5, "xp_gained": 280},
-  "2026-03-01": {"checked": true, "tasks_count": 4, "xp_gained": 180},
-  "2026-03-02": {"checked": true, "tasks_count": 6, "xp_gained": 320},
-  "2026-03-03": {"checked": true, "tasks_count": 2, "xp_gained": 130}
+  "2026-03-02": {
+    "checked": true,
+    "tasks_count": 2,
+    "xp_gained": 201
+  }
 }

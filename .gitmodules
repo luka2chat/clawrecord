@@ -1,0 +1,3 @@
+[submodule "leaderboard"]
+	path = leaderboard
+	url = https://github.com/luka2chat/clawrecord-leaderboard.git
