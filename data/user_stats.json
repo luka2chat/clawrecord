@@ -1,0 +1,25 @@
+{
+  "username": "luka2chat",
+  "level": 1,
+  "xp": 150,
+  "xp_to_next_level": 500,
+  "streak": 5,
+  "hp": 80,
+  "max_hp": 100,
+  "rank": "新手驯兽师",
+  "badges": [
+    {
+      "id": "first_email",
+      "name": "第一次让 AI 发邮件",
+      "icon": "📧",
+      "date": "2026-03-01"
+    }
+  ],
+  "skills": {
+    "email_management": 2,
+    "schedule_management": 1,
+    "coding_assistant": 3,
+    "data_analysis": 0
+  },
+  "last_check_in": "2026-03-03"
+}

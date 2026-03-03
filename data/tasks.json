@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "date": "2026-03-01",
+    "type": "email_management",
+    "description": "让 OpenClaw 自动回复了 5 封邮件",
+    "xp_gained": 50,
+    "complexity": "medium"
+  },
+  {
+    "id": 2,
+    "date": "2026-03-02",
+    "type": "coding_assistant",
+    "description": "使用 OpenClaw 调试 Python 脚本",
+    "xp_gained": 100,
+    "complexity": "high"
+  },
+  {
+    "id": 3,
+    "date": "2026-03-03",
+    "type": "schedule_management",
+    "description": "安排了本周的会议日程",
+    "xp_gained": 30,
+    "complexity": "low"
+  }
+]

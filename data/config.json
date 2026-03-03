@@ -1,0 +1,103 @@
+{
+  "levels": [
+    {"level": 1, "rank": "新手驯兽师", "xp_required": 0, "icon": "🐣"},
+    {"level": 2, "rank": "学徒驯兽师", "xp_required": 500, "icon": "🐥"},
+    {"level": 3, "rank": "助理驯兽师", "xp_required": 1200, "icon": "🦅"},
+    {"level": 5, "rank": "高级驯兽师", "xp_required": 3000, "icon": "🦉"},
+    {"level": 10, "rank": "Claw 大师", "xp_required": 8000, "icon": "🤖"},
+    {"level": 20, "rank": "AI 专家", "xp_required": 20000, "icon": "🧠"},
+    {"level": 50, "rank": "AI 领主", "xp_required": 100000, "icon": "👑"}
+  ],
+  "badges": [
+    {
+      "id": "first_email",
+      "name": "第一次让 AI 发邮件",
+      "description": "首次使用 OpenClaw 发送邮件",
+      "icon": "📧",
+      "condition": "email_management >= 1"
+    },
+    {
+      "id": "streak_7",
+      "name": "连续打卡 7 天",
+      "description": "连续 7 天使用 OpenClaw",
+      "icon": "🔥",
+      "condition": "streak >= 7"
+    },
+    {
+      "id": "streak_30",
+      "name": "连续打卡 30 天",
+      "description": "连续 30 天使用 OpenClaw",
+      "icon": "🌟",
+      "condition": "streak >= 30"
+    },
+    {
+      "id": "50_tasks",
+      "name": "一天完成 50 个任务",
+      "description": "在单个日期完成 50 个任务",
+      "icon": "⚡",
+      "condition": "daily_tasks >= 50"
+    },
+    {
+      "id": "claw_master",
+      "name": "Claw 大师",
+      "description": "达到 Claw 大师等级",
+      "icon": "🤖",
+      "condition": "level >= 10"
+    },
+    {
+      "id": "skill_master",
+      "name": "全能高手",
+      "description": "所有技能等级都达到 5 级",
+      "icon": "🎯",
+      "condition": "all_skills >= 5"
+    }
+  ],
+  "skills": [
+    {
+      "id": "email_management",
+      "name": "邮件管理",
+      "description": "使用 OpenClaw 管理和自动化邮件任务",
+      "icon": "📧",
+      "max_level": 10
+    },
+    {
+      "id": "schedule_management",
+      "name": "日程管理",
+      "description": "使用 OpenClaw 安排和管理日程",
+      "icon": "📅",
+      "max_level": 10
+    },
+    {
+      "id": "coding_assistant",
+      "name": "编程辅助",
+      "description": "使用 OpenClaw 进行代码编写和调试",
+      "icon": "💻",
+      "max_level": 10
+    },
+    {
+      "id": "data_analysis",
+      "name": "数据分析",
+      "description": "使用 OpenClaw 进行数据分析和可视化",
+      "icon": "📊",
+      "max_level": 10
+    },
+    {
+      "id": "content_creation",
+      "name": "内容创作",
+      "description": "使用 OpenClaw 进行文章、报告等内容创作",
+      "icon": "✍️",
+      "max_level": 10
+    }
+  ],
+  "xp_rewards": {
+    "low": 30,
+    "medium": 100,
+    "high": 200,
+    "epic": 500
+  },
+  "weekly_challenge": {
+    "target": 500,
+    "description": "本周目标：获得 500 XP",
+    "hp_penalty": 20
+  }
+}
