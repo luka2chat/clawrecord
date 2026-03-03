@@ -1,32 +1,35 @@
 # 🤖 ClawRecord
 
-> OpenClaw 游戏化记录系统 - 追踪您的 AI 驯兽师之旅
+[English](./README.md) | [简体中文](./README_CN.md)
 
-ClawRecord 是一个受多邻国（Duolingo）启发的记录系统，专门用于追踪和游戏化您使用 **OpenClaw**（开源 AI 个人助理）的过程。
+> Gamified OpenClaw Tracking System - Track your journey as an AI Tamer.
 
-## 🌟 核心功能
+ClawRecord is a tracking system inspired by Duolingo, designed to track and gamify your experience with **OpenClaw** (an open-source AI personal assistant).
 
-- **🔥 每日打卡 Streak**：保持连续使用，积累连胜。
-- **📈 XP 经验值**：完成不同难度的任务获得 XP。
-- **🛡️ 等级系统**：从“新手驯兽师”进化到“AI 领主”。
-- **🏆 成就徽章**：解锁里程碑成就。
-- **🎯 技能树**：在邮件管理、编程辅助等领域提升技能。
-- **❤️ 生命值/挑战**：设定每周目标，保持动力。
-- **📊 贡献热力图**：直观展示您的 AI 使用频率。
+## 🌟 Key Features
 
-## 🛠️ 技术方案
+- **🔥 Daily Streak**: Maintain your usage streak and accumulate wins.
+- **📈 XP System**: Earn XP by completing tasks of varying difficulty.
+- **🛡️ Leveling System**: Evolve from a "Novice Tamer" to an "AI Overlord".
+- **🏆 Achievements**: Unlock milestone badges.
+- **🎯 Skills Tree**: Level up your skills in Email Management, Coding, and more.
+- **❤️ HP & Challenges**: Set weekly goals and stay motivated.
+- **📊 Activity Heatmap**: Visualize your AI usage frequency.
+- **🌍 Multi-language Support**: Supports English and Chinese (i18n).
 
-- **数据存储**：`/data` 目录下的 JSON 文件。
-- **页面生成**：Python 脚本 `scripts/generate_pages.py`。
-- **自动化**：GitHub Actions 每天定时构建。
-- **部署**：GitHub Pages 免费托管。
+## 🛠️ Technical Stack
 
-## 🚀 如何记录新任务
+- **Data Storage**: JSON files in the `/data` directory.
+- **Page Generation**: Python script `scripts/generate_pages.py`.
+- **Automation**: GitHub Actions for daily automated builds.
+- **Deployment**: Free hosting via GitHub Pages.
 
-1. 编辑 `data/tasks.json` 添加新任务。
-2. 编辑 `data/check_ins.json` 更新打卡状态。
-3. 编辑 `data/user_stats.json` 更新 XP 和等级。
-4. 提交并推送代码，GitHub Actions 会自动更新页面。
+## 🚀 How to Record New Tasks
+
+1. Edit `data/tasks.json` to add new tasks.
+2. Edit `data/check_ins.json` to update check-in status.
+3. Edit `data/user_stats.json` to update XP and levels.
+4. Push your changes, and GitHub Actions will automatically update the dashboard.
 
 ---
 Powered by OpenClaw & GitHub Actions
