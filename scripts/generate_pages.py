@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 """
-ClawRecord Dashboard Generator
+ClawRecord Dashboard Generator v2 — Hamster-style Command Center
 
-Aesthetic direction: Cyberpunk Command Center
-DFII: 16 (Impact 4 + Fit 5 + Feasibility 4 + Performance 5 - Risk 2)
-
-Fonts: Space Grotesk (display) + JetBrains Mono (data)
-Palette: Deep navy + emerald primary + indigo accent
-Texture: SVG noise overlay, gradient glow borders, layered translucency
+Layout: Claw Power hero -> Daily quests -> Skill cards -> League -> Heatmap
+        -> Multi-tier badges -> Personal records -> Recent activity
 """
 
 import json
-import math
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -22,97 +17,12 @@ from utils import DATA_DIR, OUTPUT_DIR, get_text, load_json
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 
-# ── SVG Radar Chart ─────────────────────────────────────────────────
-
-def build_radar_svg(skills_data, config_skills, lang):
-    n = len(config_skills)
-    if n < 3:
-        return ""
-    cx, cy, r = 140, 140, 105
-    angle_step = 2 * math.pi / n
-
-    grid_lines = []
-    for ring in [0.25, 0.5, 0.75, 1.0]:
-        points = []
-        for i in range(n):
-            a = -math.pi / 2 + i * angle_step
-            px = cx + r * ring * math.cos(a)
-            py = cy + r * ring * math.sin(a)
-            points.append(f"{px:.1f},{py:.1f}")
-        opacity = "0.08" if ring < 1.0 else "0.2"
-        grid_lines.append(
-            f'<polygon points="{" ".join(points)}" '
-            f'fill="none" stroke="rgba(148,163,184,{opacity})" stroke-width="1"/>'
-        )
-
-    axis_lines = []
-    labels = []
-    data_points = []
-    for i, skill in enumerate(config_skills):
-        a = -math.pi / 2 + i * angle_step
-        ex = cx + r * math.cos(a)
-        ey = cy + r * math.sin(a)
-        axis_lines.append(
-            f'<line x1="{cx}" y1="{cy}" x2="{ex:.1f}" y2="{ey:.1f}" '
-            f'stroke="rgba(148,163,184,0.08)" stroke-width="1"/>'
-        )
-
-        lx = cx + (r + 32) * math.cos(a)
-        ly = cy + (r + 32) * math.sin(a)
-        anchor = "middle"
-        if lx < cx - 10:
-            anchor = "end"
-        elif lx > cx + 10:
-            anchor = "start"
-        label = get_text(skill["name"], lang)
-        level = skills_data.get(skill["id"], 0)
-        labels.append(
-            f'<text x="{lx:.1f}" y="{ly:.1f}" text-anchor="{anchor}" '
-            f'dominant-baseline="middle" fill="#94a3b8" '
-            f'font-family="Space Grotesk,sans-serif" font-size="11" font-weight="500">'
-            f'{skill["icon"]} {label} ({level})</text>'
-        )
-
-        ratio = min(level / skill["max_level"], 1.0) if skill["max_level"] > 0 else 0
-        dx = cx + r * ratio * math.cos(a)
-        dy = cy + r * ratio * math.sin(a)
-        data_points.append(f"{dx:.1f},{dy:.1f}")
-
-    polygon = (
-        f'<polygon points="{" ".join(data_points)}" '
-        f'fill="rgba(34,197,94,0.15)" stroke="url(#radarGrad)" stroke-width="2.5"/>'
-    )
-    dots = "".join(
-        f'<circle cx="{p.split(",")[0]}" cy="{p.split(",")[1]}" r="3.5" '
-        f'fill="#22c55e" filter="url(#glow)"/>'
-        for p in data_points
-    )
-
-    return f'''<svg viewBox="0 0 280 280" class="radar-chart">
-    <defs>
-      <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#22c55e"/>
-        <stop offset="100%" stop-color="#06b6d4"/>
-      </linearGradient>
-      <filter id="glow"><feGaussianBlur stdDeviation="2" result="g"/>
-        <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
-      </filter>
-    </defs>
-    {"".join(grid_lines)}
-    {"".join(axis_lines)}
-    {polygon}
-    {dots}
-    {"".join(labels)}
-    </svg>'''
-
-
-# ── Heatmap ─────────────────────────────────────────────────────────
+# ── Heatmap ────────────────────────────────────────────────────────
 
 def build_heatmap(check_ins, lang):
     today = datetime.utcnow().date()
     start = today - timedelta(days=90)
-    weekday_offset = start.weekday()  # Mon=0
-
+    weekday_offset = start.weekday()
     cells = []
     for i in range(91):
         d = start + timedelta(days=i)
@@ -133,15 +43,266 @@ def build_heatmap(check_ins, lang):
         col = (weekday_offset + i) // 7
         cells.append(
             f'<div class="hm-cell hm-{level}" '
-            f'style="grid-row:{row + 1};grid-column:{col + 1}" '
+            f'style="grid-row:{row+1};grid-column:{col+1}" '
             f'title="{ds}: {xp} XP"></div>'
         )
     return "".join(cells)
 
 
-# ── Dashboard HTML ──────────────────────────────────────────────────
+# ── Skill Cards ────────────────────────────────────────────────────
 
-def generate_dashboard(user_stats, tasks, config, check_ins, lang):
+def build_skill_cards(skills_data, config, lang):
+    groups = config.get("skill_groups", {})
+    grouped = {}
+    for s in config["skills"]:
+        g = s.get("group", "core")
+        grouped.setdefault(g, []).append(s)
+
+    html_parts = []
+    for gid, g_conf in groups.items():
+        g_name = get_text(g_conf["name"], lang)
+        g_icon = g_conf.get("icon", "")
+        cards_html = []
+        for skill in grouped.get(gid, []):
+            sid = skill["id"]
+            sdata = skills_data.get(sid, {})
+            if isinstance(sdata, dict):
+                lvl = sdata.get("level", 0)
+                xp = sdata.get("xp", 0)
+                power = sdata.get("power", 0)
+                next_xp = sdata.get("next_level_xp", skill["xp_per_level"])
+                max_lvl = sdata.get("max_level", skill["max_level"])
+            else:
+                lvl = sdata if isinstance(sdata, int) else 0
+                xp = 0
+                power = lvl * skill.get("power_per_level", 20)
+                next_xp = skill["xp_per_level"]
+                max_lvl = skill["max_level"]
+            pct = min((xp / max(next_xp, 1)) * 100, 100) if lvl < max_lvl else 100
+            s_name = get_text(skill["name"], lang)
+            pwr_label = get_text(config["ui_text"].get("power_per_level", {"en": "Power", "zh": "战力"}), lang)
+            maxed = " maxed" if lvl >= max_lvl else ""
+            cards_html.append(
+                f'<div class="sk-card{maxed}">'
+                f'<div class="sk-icon">{skill["icon"]}</div>'
+                f'<div class="sk-info">'
+                f'<div class="sk-name">{s_name}</div>'
+                f'<div class="sk-lvl">Lv.{lvl}<span class="sk-max">/{max_lvl}</span></div>'
+                f'</div>'
+                f'<div class="sk-bar"><div class="sk-fill" style="width:{pct:.0f}%"></div></div>'
+                f'<div class="sk-pwr">+{power} {pwr_label}</div>'
+                f'</div>'
+            )
+        html_parts.append(
+            f'<div class="sk-group">'
+            f'<div class="sk-group-hdr">{g_icon} {g_name}</div>'
+            f'<div class="sk-group-cards">{"".join(cards_html)}</div>'
+            f'</div>'
+        )
+    return "".join(html_parts)
+
+
+# ── Daily Quests ───────────────────────────────────────────────────
+
+def build_daily_quests(quests, config, lang):
+    ui = {k: get_text(v, lang) for k, v in config["ui_text"].items()}
+    dq_conf = config.get("daily_quests", {})
+
+    combo = quests.get("combo", {})
+    combo_name = get_text(dq_conf.get("combo", {}).get("name", {"en": "Daily Combo"}), lang)
+    combo_skills = combo.get("skills", [])
+    combo_activated = combo.get("activated", 0)
+    combo_activated_set = set(combo.get("activated_skills", []))
+    combo_total = combo.get("total", 3)
+    combo_done = combo.get("complete", False)
+    combo_pct = min(combo_activated / max(combo_total, 1) * 100, 100)
+    combo_xp = combo.get("xp_reward", 100)
+
+    skill_map = {s["id"]: s for s in config["skills"]}
+    combo_pills = ""
+    for sid in combo_skills:
+        sc = skill_map.get(sid, {})
+        icon = sc.get("icon", "")
+        name = get_text(sc.get("name", {"en": sid}), lang)
+        active = "active" if sid in combo_activated_set else ""
+        combo_pills += f'<span class="q-pill {active}">{icon} {name}</span>'
+
+    ch = quests.get("challenge", {})
+    ch_name = get_text(ch.get("name", {}), lang) or "Challenge"
+    ch_desc = get_text(ch.get("desc", {}), lang) or ""
+    ch_target = ch.get("target", 1)
+    ch_progress = ch.get("progress", 0)
+    ch_done = ch.get("complete", False)
+    ch_pct = min(ch_progress / max(ch_target, 1) * 100, 100)
+    ch_xp = ch.get("xp_reward", 0)
+    if "{n}" in ch_desc:
+        ch_desc = ch_desc.replace("{n}", str(ch_target))
+
+    st = quests.get("streak", {})
+    st_name = get_text(dq_conf.get("streak", {}).get("name", {"en": "Daily Streak"}), lang)
+    st_done = st.get("complete", False)
+
+    def quest_card(title, inner, done, xp_reward):
+        done_cls = " q-done" if done else " q-pulse"
+        check = '<span class="q-check">\u2714</span>' if done else ""
+        xp_tag = f'<span class="q-xp">+{xp_reward} XP</span>' if xp_reward else ""
+        return (
+            f'<div class="q-card{done_cls}">'
+            f'<div class="q-hdr">{title}{check}{xp_tag}</div>'
+            f'{inner}'
+            f'</div>'
+        )
+
+    combo_inner = (
+        f'<div class="q-pills">{combo_pills}</div>'
+        f'<div class="q-bar"><div class="q-fill" style="width:{combo_pct:.0f}%"></div></div>'
+        f'<div class="q-stat">{combo_activated}/{combo_total}</div>'
+    )
+    ch_inner = (
+        f'<div class="q-desc">{ch_desc}</div>'
+        f'<div class="q-bar"><div class="q-fill" style="width:{ch_pct:.0f}%"></div></div>'
+        f'<div class="q-stat">{ch_progress}/{ch_target}</div>'
+    )
+    st_inner = (
+        f'<div class="q-desc">{get_text(dq_conf.get("streak", {}).get("desc", {}), lang)}</div>'
+        f'<div class="q-bar"><div class="q-fill" style="width:{"100" if st_done else "0"}%"></div></div>'
+    )
+
+    now = datetime.utcnow()
+    midnight = (now + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    remaining = midnight - now
+    hours_left = int(remaining.total_seconds() // 3600)
+    mins_left = int((remaining.total_seconds() % 3600) // 60)
+    timer = f'{ui.get("resets_in", "Resets in")} {hours_left}h {mins_left}m'
+
+    return (
+        f'<div class="q-row">'
+        f'{quest_card(combo_name, combo_inner, combo_done, combo_xp)}'
+        f'{quest_card(ch_name, ch_inner, ch_done, ch_xp)}'
+        f'{quest_card(st_name, st_inner, st_done, 0)}'
+        f'</div>'
+        f'<div class="q-timer">\u23f0 {timer}</div>'
+    )
+
+
+# ── League Bar ─────────────────────────────────────────────────────
+
+def build_league_bar(config, current_league_id, weekly_xp, lang):
+    leagues = config["leagues"]
+    items = []
+    for lg in leagues:
+        on = "on" if lg["id"] == current_league_id else ""
+        name = get_text(lg["name"], lang)
+        items.append(
+            f'<div class="lg-item {on}">'
+            f'<span class="lg-icon">{lg["icon"]}</span>'
+            f'<span class="lg-name">{name}</span>'
+            f'</div>'
+        )
+    return "".join(items)
+
+
+# ── Multi-tier Badges ──────────────────────────────────────────────
+
+def build_badges(user_badges, config, lang):
+    unlocked_map = {b["id"]: b for b in user_badges}
+    tier_styles = config.get("badge_tier_styles", {})
+
+    cat_labels = {
+        "milestone":  {"en": "Milestones",  "zh": "\u91cc\u7a0b\u7891"},
+        "streak":     {"en": "Streaks",     "zh": "\u8fde\u7eed\u7eaa\u5f55"},
+        "skill":      {"en": "Skills",      "zh": "\u6280\u80fd"},
+        "tool":       {"en": "Tools",       "zh": "\u5de5\u5177"},
+        "efficiency": {"en": "Efficiency",  "zh": "\u6548\u7387"},
+        "time":       {"en": "Time",        "zh": "\u65f6\u95f4"},
+        "special":    {"en": "Special",     "zh": "\u7279\u6b8a"},
+    }
+
+    by_cat = {}
+    for badge in config["badges"]:
+        cat = badge.get("category", "other")
+        by_cat.setdefault(cat, []).append(badge)
+
+    sections = []
+    for cat, badges_list in by_cat.items():
+        cat_name = get_text(cat_labels.get(cat, {"en": cat}), lang)
+        items = []
+        for badge in badges_list:
+            bid = badge["id"]
+            u = unlocked_map.get(bid)
+            name = get_text(badge["name"], lang)
+            icon = badge["icon"]
+            tiers = badge.get("tiers", [])
+
+            if u:
+                tier = u.get("tier", 1)
+                max_tier = u.get("max_tier", len(tiers))
+                metric = u.get("metric", 0)
+                next_val = u.get("next_tier_value")
+                ts = tier_styles.get(str(tier), {})
+                border_cls = ts.get("border", "bronze")
+                stars = "\u2b50" * ts.get("stars", tier)
+                pct = 100
+                if next_val and next_val > 0:
+                    cur_tier_val = 0
+                    for t in tiers:
+                        if t["tier"] == tier:
+                            cur_tier_val = t["value"]
+                            break
+                    progress_range = next_val - cur_tier_val
+                    if progress_range > 0:
+                        pct = min((metric - cur_tier_val) / progress_range * 100, 100)
+                tier_label = u.get("tier_label", "")
+                items.append(
+                    f'<div class="bdg bdg-{border_cls}" title="{tier_label}">'
+                    f'<div class="bdg-icon">{icon}</div>'
+                    f'<div class="bdg-name">{name}</div>'
+                    f'<div class="bdg-stars">{stars}</div>'
+                    f'<div class="bdg-bar"><div class="bdg-fill" style="width:{pct:.0f}%"></div></div>'
+                    f'<div class="bdg-tier">T{tier}/{max_tier}</div>'
+                    f'</div>'
+                )
+            else:
+                items.append(
+                    f'<div class="bdg bdg-locked">'
+                    f'<div class="bdg-icon">\U0001f512</div>'
+                    f'<div class="bdg-name">{name}</div>'
+                    f'</div>'
+                )
+        sections.append(
+            f'<div class="bdg-cat">'
+            f'<div class="bdg-cat-title">{cat_name}</div>'
+            f'<div class="bdg-grid">{"".join(items)}</div>'
+            f'</div>'
+        )
+    return "".join(sections)
+
+
+# ── Personal Records ───────────────────────────────────────────────
+
+def build_records(records, config, lang):
+    ui = {k: get_text(v, lang) for k, v in config["ui_text"].items()}
+    items = [
+        ("\u26a1", ui.get("best_daily_xp", "Best Daily XP"), f'{records.get("best_daily_xp", 0):,}'),
+        ("\U0001f525", ui.get("longest_streak", "Longest Streak"), f'{records.get("longest_streak", 0)} {ui.get("days", "days")}'),
+        ("\U0001f4ac", ui.get("best_session", "Longest Session"), f'{records.get("best_session_turns", 0)} turns'),
+        ("\U0001f527", ui.get("best_daily_tools", "Most Tools/Day"), f'{records.get("best_daily_tools", 0)}'),
+    ]
+    cards = ""
+    for icon, label, value in items:
+        cards += (
+            f'<div class="rec-card">'
+            f'<div class="rec-icon">{icon}</div>'
+            f'<div class="rec-val">{value}</div>'
+            f'<div class="rec-label">{label}</div>'
+            f'</div>'
+        )
+    return cards
+
+
+# ── Dashboard HTML ─────────────────────────────────────────────────
+
+def generate_dashboard(user_stats, tasks, config, check_ins, quests, lang):
     ui = {k: get_text(v, lang) for k, v in config["ui_text"].items()}
 
     level_info = next(
@@ -170,56 +331,29 @@ def generate_dashboard(user_stats, tasks, config, check_ins, lang):
         config["leagues"][0],
     )
     league_name = get_text(league_conf["name"], lang)
-
-    radar_svg = build_radar_svg(user_stats.get("skills", {}), config["skills"], lang)
+    league_bar = build_league_bar(config, league.get("id", "bronze"), user_stats.get("weekly_xp", 0), lang)
     heatmap_html = build_heatmap(check_ins, lang)
+    skill_cards_html = build_skill_cards(user_stats.get("skills", {}), config, lang)
+    daily_quests_html = build_daily_quests(quests, config, lang)
+    badges_html = build_badges(user_stats.get("badges", []), config, lang)
+    records = user_stats.get("personal_records", {})
+    records_html = build_records(records, config, lang)
 
-    # Achievements grouped by category
-    unlocked_ids = {b["id"] for b in user_stats.get("badges", [])}
-    unlocked_count = len(unlocked_ids)
+    claw_power = user_stats.get("claw_power", 0)
+    today_xp = user_stats.get("today_xp", 0)
+    multiplier = user_stats.get("streak_multiplier", 1.0)
+
+    streak_freeze = ""
+    sf = user_stats.get("streak_freezes", 0)
+    if sf > 0:
+        streak_freeze = f' <span class="freeze">\U0001f9ca x{sf}</span>'
+
+    xp_display = f"{user_stats['xp']:,}"
+    next_xp_display = f"{next_level['xp_required']:,}" if next_level else xp_display
+
+    unlocked_count = len(user_stats.get("badges", []))
     total_badges = len(config["badges"])
 
-    badges_by_cat = {}
-    for badge in config["badges"]:
-        cat = badge.get("category", "other")
-        badges_by_cat.setdefault(cat, []).append(badge)
-
-    cat_labels = {
-        "milestone": {"en": "Milestones", "zh": "\u91cc\u7a0b\u7891"},
-        "streak": {"en": "Streaks", "zh": "\u8fde\u7eed\u7eaa\u5f55"},
-        "skill": {"en": "Skills", "zh": "\u6280\u80fd"},
-        "tool": {"en": "Tools", "zh": "\u5de5\u5177"},
-        "efficiency": {"en": "Efficiency", "zh": "\u6548\u7387"},
-        "time": {"en": "Time", "zh": "\u65f6\u95f4"},
-        "special": {"en": "Special", "zh": "\u7279\u6b8a"},
-        "other": {"en": "Other", "zh": "\u5176\u4ed6"},
-    }
-
-    badges_html_sections = []
-    for cat, cat_badges in badges_by_cat.items():
-        cat_name = get_text(cat_labels.get(cat, {"en": cat, "zh": cat}), lang)
-        items = []
-        for badge in cat_badges:
-            is_unlocked = badge["id"] in unlocked_ids
-            cls = "badge unlocked" if is_unlocked else "badge locked"
-            name = get_text(badge["name"], lang)
-            desc = get_text(badge["description"], lang)
-            icon = badge["icon"] if is_unlocked else "&#x1f512;"
-            items.append(
-                f'<div class="{cls}" title="{desc}">'
-                f'<span class="b-icon">{icon}</span>'
-                f'<span class="b-name">{name}</span>'
-                f'</div>'
-            )
-        badges_html_sections.append(
-            f'<div class="badge-cat">'
-            f'<h3 class="cat-title">{cat_name}</h3>'
-            f'<div class="badge-row">{"".join(items)}</div>'
-            f'</div>'
-        )
-    badges_html = "".join(badges_html_sections)
-
-    # Recent tasks
     recent = sorted(tasks, key=lambda t: t["date"], reverse=True)[:8]
     if recent:
         rows = "".join(
@@ -235,23 +369,9 @@ def generate_dashboard(user_stats, tasks, config, check_ins, lang):
     else:
         tasks_html = f'<p class="empty">{ui["empty_tasks"]}</p>'
 
-    streak_freeze = ""
-    sf = user_stats.get("streak_freezes", 0)
-    if sf > 0:
-        streak_freeze = f' <span class="freeze">&#x1f9ca; x{sf}</span>'
-
-    xp_display = f"{user_stats['xp']:,}"
-    next_xp_display = f"{next_level['xp_required']:,}" if next_level else xp_display
-
-    # League tiers
-    tiers_html = "".join(
-        f'<div class="tier {"on" if lg["id"] == league.get("id") else ""}">'
-        f'<span class="tier-icon">{lg["icon"]}</span>'
-        f'<span class="tier-name">{get_text(lg["name"], lang)}</span>'
-        f'<span class="tier-req">{lg["min_weekly_xp"]}+</span>'
-        f'</div>'
-        for lg in config["leagues"]
-    )
+    mult_tag = ""
+    if multiplier > 1.0:
+        mult_tag = f'<span class="hero-mult">\U0001f680 x{multiplier}</span>'
 
     return f'''<!DOCTYPE html>
 <html lang="{lang}">
@@ -265,99 +385,97 @@ def generate_dashboard(user_stats, tasks, config, check_ins, lang):
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
 <div class="noise"></div>
-
 <div class="shell">
-  <nav class="nav">
-    <div class="nav-l">
-      <span class="brand">\U0001f43e ClawRecord</span>
-      <span class="sep">/</span>
-      <span class="nav-user">{user_stats["username"]}</span>
-    </div>
-    <div class="nav-r">
-      <span class="pill">{league_conf["icon"]} {league_name}</span>
-      {lang_links}
-    </div>
-  </nav>
 
-  <header class="hero">
-    <div class="hero-avatar">
-      <div class="av-ring">
-        <div class="av-inner">{user_stats.get("avatar", level_info["icon"])}</div>
-      </div>
-      <div class="av-rank">{get_text(level_info["rank"], lang)}</div>
-    </div>
-    <div class="hero-body">
-      <h1 class="hero-name">{user_stats["username"]}</h1>
-      <div class="hero-sub">Lv.{user_stats["level"]} &middot; {get_text(level_info["rank"], lang)}</div>
-      <div class="xp-track">
-        <div class="xp-fill" style="width:{xp_progress:.1f}%"></div>
-        <span class="xp-label">{xp_display} / {next_xp_display} XP</span>
-      </div>
-    </div>
-    <div class="hero-stats">
-      <div class="hs"><span class="hs-val">{user_stats["level"]}</span><span class="hs-key">{ui["level"]}</span></div>
-      <div class="hs"><span class="hs-val">\U0001f525 {user_stats["streak"]}</span>{streak_freeze}<span class="hs-key">{ui["streak"]}</span></div>
-      <div class="hs"><span class="hs-val">\u2764\ufe0f {user_stats["hp"]}<small>/{user_stats["max_hp"]}</small></span><span class="hs-key">{ui["hp"]}</span></div>
-      <div class="hs"><span class="hs-val">\u26a1 {user_stats.get("weekly_xp", 0)}</span><span class="hs-key">{ui["weekly_xp"]}</span></div>
-    </div>
-  </header>
-
-  <div class="grid2">
-    <section class="card card-skills">
-      <h2>{ui["skills_tree"]}</h2>
-      <div class="radar-box">{radar_svg}</div>
-    </section>
-    <section class="card card-league">
-      <h2>{ui["league"]}</h2>
-      <div class="league-hero">
-        <span class="l-icon">{league_conf["icon"]}</span>
-        <span class="l-name">{league_name}</span>
-        <span class="l-sub">{ui["weekly_xp"]}: <strong>{user_stats.get("weekly_xp", 0)}</strong></span>
-      </div>
-      <div class="tiers">{tiers_html}</div>
-    </section>
+<nav class="nav">
+  <div class="nav-l">
+    <span class="brand">\U0001f43e ClawRecord</span>
+    <span class="sep">/</span>
+    <span class="nav-user">{user_stats["username"]}</span>
   </div>
+  <div class="nav-r">
+    <span class="pill">{league_conf["icon"]} {league_name}</span>
+    {lang_links}
+  </div>
+</nav>
 
-  <section class="card card-heat">
-    <h2>{ui["heatmap"]}</h2>
-    <div class="hm-grid">{heatmap_html}</div>
-    <div class="hm-legend">
-      <span>{ui["less"]}</span>
-      <div class="hm-cell hm-0"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-4"></div>
-      <span>{ui["more"]}</span>
+<header class="hero">
+  <div class="hero-left">
+    <div class="av-ring"><div class="av-inner">{user_stats.get("avatar", level_info["icon"])}</div></div>
+    <div class="av-rank">{get_text(level_info["rank"], lang)}</div>
+  </div>
+  <div class="hero-center">
+    <div class="power-label">{ui.get("claw_power", "Claw Power")}</div>
+    <div class="power-num">{claw_power:,}</div>
+    <div class="power-delta">+{today_xp} {ui.get("today_gain", "today")} {mult_tag}</div>
+    <div class="xp-track">
+      <div class="xp-fill" style="width:{xp_progress:.1f}%"></div>
+      <span class="xp-label">Lv.{user_stats["level"]} \u2014 {xp_display} / {next_xp_display} XP</span>
     </div>
-  </section>
+  </div>
+  <div class="hero-stats">
+    <div class="hs"><span class="hs-val">{user_stats["level"]}</span><span class="hs-key">{ui["level"]}</span></div>
+    <div class="hs"><span class="hs-val">\U0001f525 {user_stats["streak"]}</span>{streak_freeze}<span class="hs-key">{ui["streak"]}</span></div>
+    <div class="hs"><span class="hs-val">\u2764\ufe0f {user_stats["hp"]}<small>/{user_stats["max_hp"]}</small></span><span class="hs-key">{ui["hp"]}</span></div>
+    <div class="hs"><span class="hs-val">\u26a1 {user_stats.get("weekly_xp", 0)}</span><span class="hs-key">{ui["weekly_xp"]}</span></div>
+  </div>
+</header>
 
-  <section class="card card-badges">
-    <h2>{ui["achievements"]} <span class="dim">{unlocked_count}/{total_badges}</span></h2>
-    {badges_html}
-  </section>
+<section class="card card-quests">
+  <h2>\U0001f3af {ui.get("daily_quests", "Daily Quests")}</h2>
+  {daily_quests_html}
+</section>
 
-  <section class="card card-tasks">
-    <h2>{ui["recent_tasks"]}</h2>
-    {tasks_html}
-  </section>
+<section class="card card-skills">
+  <h2>\U0001f0cf {ui.get("skills_tree", "Skill Cards")}</h2>
+  <div class="sk-wall">{skill_cards_html}</div>
+</section>
 
-  <footer class="foot">
-    <p>{ui["last_updated"]}: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}</p>
-    <p>Powered by <a href="https://github.com/openclaw/openclaw">OpenClaw</a> &amp; <a href="https://github.com/luka2chat/clawrecord">ClawRecord</a></p>
-  </footer>
+<section class="card card-league">
+  <h2>\U0001f3c6 {ui["league"]} <span class="dim">{ui["weekly_xp"]}: {user_stats.get("weekly_xp", 0)}</span></h2>
+  <div class="lg-bar">{league_bar}</div>
+</section>
+
+<section class="card card-heat">
+  <h2>\U0001f4c5 {ui["heatmap"]}</h2>
+  <div class="hm-grid">{heatmap_html}</div>
+  <div class="hm-legend">
+    <span>{ui["less"]}</span>
+    <div class="hm-cell hm-0"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-4"></div>
+    <span>{ui["more"]}</span>
+  </div>
+</section>
+
+<section class="card card-badges">
+  <h2>\U0001f3c5 {ui["achievements"]} <span class="dim">{unlocked_count}/{total_badges}</span></h2>
+  {badges_html}
+</section>
+
+<section class="card card-records">
+  <h2>\U0001f947 {ui.get("personal_bests", "Personal Bests")}</h2>
+  <div class="rec-grid">{records_html}</div>
+</section>
+
+<section class="card card-tasks">
+  <h2>\U0001f4cb {ui["recent_tasks"]}</h2>
+  {tasks_html}
+</section>
+
+<footer class="foot">
+  <p>{ui["last_updated"]}: {datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")}</p>
+  <p>Powered by <a href="https://github.com/openclaw/openclaw">OpenClaw</a> &amp; <a href="https://github.com/luka2chat/clawrecord">ClawRecord</a></p>
+</footer>
+
 </div>
-
 </body>
 </html>'''
 
 
-# ── CSS ─────────────────────────────────────────────────────────────
+# ── CSS ────────────────────────────────────────────────────────────
 
 def generate_css():
     return """\
-/* ClawRecord — Cyberpunk Command Center
-   Fonts: Space Grotesk + JetBrains Mono
-   Palette: Deep navy #050a18, emerald #22c55e, indigo #6366f1 */
-
 :root {
   --bg: #050a18;
   --surface: #0a1128;
@@ -380,56 +498,38 @@ def generate_css():
   --font: 'Space Grotesk', system-ui, sans-serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 }
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
-  font-family: var(--font);
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.6;
-  min-height: 100vh;
-  overflow-x: hidden;
+  font-family: var(--font); background: var(--bg); color: var(--text);
+  line-height: 1.6; min-height: 100vh; overflow-x: hidden;
 }
-
 a { color: var(--g); text-decoration: none; transition: color .2s; }
 a:hover { color: var(--cyan); }
 
-/* Noise overlay */
 .noise {
-  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-  opacity: .035;
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: .035;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 200px 200px;
+  background-repeat: repeat; background-size: 200px 200px;
 }
+.shell { max-width: 960px; margin: 0 auto; padding: 20px 24px 40px; }
 
-.shell {
-  max-width: 940px;
-  margin: 0 auto;
-  padding: 20px 24px 40px;
-}
-
-/* ── Nav ────────────────────────────────────────── */
+/* Nav */
 .nav {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 0; margin-bottom: 28px;
-  border-bottom: 1px solid var(--border);
+  padding: 14px 0; margin-bottom: 28px; border-bottom: 1px solid var(--border);
 }
 .nav-l { display: flex; align-items: center; gap: 8px; }
 .brand {
   font-weight: 700; font-size: 1.15em; letter-spacing: -.02em;
   background: linear-gradient(135deg, var(--g), var(--cyan));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  background-clip: text;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
 }
 .sep { color: var(--muted); }
 .nav-user { color: var(--sub); font-size: .9em; }
 .nav-r { display: flex; align-items: center; gap: 10px; }
 .pill {
   background: var(--card); padding: 5px 14px; border-radius: 20px;
-  font-size: .82em; border: 1px solid var(--border);
-  font-family: var(--mono); font-weight: 500;
+  font-size: .82em; border: 1px solid var(--border); font-family: var(--mono); font-weight: 500;
 }
 .lang-btn {
   color: var(--sub); padding: 4px 12px; border: 1px solid var(--border);
@@ -442,141 +542,185 @@ a:hover { color: var(--cyan); }
 }
 .lang-btn:hover:not(.active) { border-color: var(--g); color: var(--g); }
 
-/* ── Hero ───────────────────────────────────────── */
+/* Hero — Claw Power front and center */
 .hero {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
-  gap: 28px;
-  align-items: center;
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 28px; align-items: center;
   background: linear-gradient(135deg, var(--card) 0%, rgba(99,102,241,.06) 100%);
-  padding: 32px;
-  border-radius: var(--r);
-  border: 1px solid var(--border);
-  margin-bottom: 24px;
-  position: relative;
-  overflow: hidden;
+  padding: 32px; border-radius: var(--r); border: 1px solid var(--border);
+  margin-bottom: 24px; position: relative; overflow: hidden;
 }
 .hero::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 20% 50%, rgba(34,197,94,.08) 0%, transparent 60%);
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(34,197,94,.1) 0%, transparent 60%);
   pointer-events: none;
 }
-
+.hero-left { text-align: center; position: relative; z-index: 1; }
 .av-ring {
   width: 96px; height: 96px; border-radius: 50%;
   background: conic-gradient(from 0deg, var(--g), var(--cyan), var(--indigo), var(--g));
-  padding: 3px;
-  animation: spin 8s linear infinite;
+  padding: 3px; animation: spin 8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 .av-inner {
   width: 100%; height: 100%; border-radius: 50%;
-  background: var(--card);
-  display: flex; align-items: center; justify-content: center;
+  background: var(--card); display: flex; align-items: center; justify-content: center;
   font-size: 42px;
 }
 .av-rank {
-  text-align: center; margin-top: 6px;
-  font-size: .72em; font-weight: 600; letter-spacing: .06em;
-  text-transform: uppercase; color: var(--g);
-  font-family: var(--mono);
+  margin-top: 6px; font-size: .72em; font-weight: 600; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--g); font-family: var(--mono);
 }
 
-.hero-body { min-width: 0; }
-.hero-name {
-  font-size: 2em; font-weight: 700; letter-spacing: -.03em;
-  line-height: 1.1; margin-bottom: 2px;
+.hero-center { min-width: 0; position: relative; z-index: 1; }
+.power-label {
+  font-size: .75em; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--sub); font-family: var(--mono);
 }
-.hero-sub { color: var(--sub); font-size: .88em; margin-bottom: 14px; font-family: var(--mono); }
-
+.power-num {
+  font-size: 3.2em; font-weight: 700; line-height: 1.05;
+  letter-spacing: -.03em; font-family: var(--mono);
+  background: linear-gradient(135deg, var(--g), var(--cyan));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.power-delta {
+  font-size: .85em; color: var(--g); font-family: var(--mono); margin-bottom: 12px;
+}
+.hero-mult {
+  display: inline-block; background: rgba(245,158,11,.15); color: var(--warn);
+  padding: 1px 8px; border-radius: 10px; font-size: .85em; font-weight: 600;
+  margin-left: 6px;
+}
 .xp-track {
   position: relative; height: 22px; border-radius: 11px;
-  background: var(--surface); overflow: hidden;
-  border: 1px solid var(--border);
+  background: var(--surface); overflow: hidden; border: 1px solid var(--border);
 }
 .xp-fill {
   height: 100%; border-radius: 11px;
   background: linear-gradient(90deg, #15803d, var(--g), #4ade80);
-  box-shadow: 0 0 16px var(--g-glow);
-  transition: width .8s cubic-bezier(.4,0,.2,1);
+  box-shadow: 0 0 16px var(--g-glow); transition: width .8s cubic-bezier(.4,0,.2,1);
 }
 .xp-label {
-  position: absolute; inset: 0;
-  display: flex; align-items: center; justify-content: center;
-  font-size: .7em; font-weight: 600; color: #fff;
-  font-family: var(--mono);
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-size: .7em; font-weight: 600; color: #fff; font-family: var(--mono);
   text-shadow: 0 1px 3px rgba(0,0,0,.6);
 }
 
-.hero-stats {
-  display: flex; flex-direction: column; gap: 8px;
-}
+.hero-stats { display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1; }
 .hs {
   text-align: center; padding: 8px 16px; min-width: 100px;
-  background: rgba(255,255,255,.03); border-radius: var(--r-sm);
-  border: 1px solid var(--border);
+  background: rgba(255,255,255,.03); border-radius: var(--r-sm); border: 1px solid var(--border);
 }
-.hs-val {
-  display: block; font-size: 1.15em; font-weight: 700;
-  color: var(--g); font-family: var(--mono);
-}
+.hs-val { display: block; font-size: 1.15em; font-weight: 700; color: var(--g); font-family: var(--mono); }
 .hs-val small { font-size: .7em; color: var(--sub); font-weight: 400; }
 .hs-key { display: block; font-size: .65em; color: var(--muted); margin-top: 1px; }
 .freeze { font-size: .65em; vertical-align: middle; margin-left: 2px; }
 
-/* ── Cards ──────────────────────────────────────── */
+/* Cards */
 .card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 24px;
-  margin-bottom: 20px;
-  transition: border-color .3s;
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r);
+  padding: 24px; margin-bottom: 20px; transition: border-color .3s;
 }
 .card:hover { border-color: var(--border-glow); }
 .card h2 {
   font-size: 1em; font-weight: 600; margin-bottom: 18px;
-  display: flex; align-items: center; gap: 8px;
-  letter-spacing: -.01em;
+  display: flex; align-items: center; gap: 8px; letter-spacing: -.01em;
 }
 .dim { color: var(--muted); font-weight: 400; font-size: .85em; margin-left: auto; }
 
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-/* ── Radar ──────────────────────────────────────── */
-.radar-box { display: flex; justify-content: center; padding: 4px 0; }
-.radar-chart { width: 100%; max-width: 280px; height: auto; }
-
-/* ── League ─────────────────────────────────────── */
-.league-hero { text-align: center; padding: 10px 0 18px; }
-.l-icon { font-size: 3em; display: block; filter: drop-shadow(0 0 10px rgba(255,255,255,.15)); }
-.l-name { font-size: 1.15em; font-weight: 600; display: block; margin: 4px 0; }
-.l-sub { font-size: .82em; color: var(--sub); font-family: var(--mono); }
-.l-sub strong { color: var(--g); }
-
-.tiers { display: flex; gap: 6px; }
-.tier {
-  flex: 1; text-align: center; padding: 10px 4px;
-  border-radius: var(--r-sm);
-  background: var(--surface); border: 1px solid var(--border);
-  opacity: .45; transition: all .25s;
+/* ── Daily Quests ─────────────────────────── */
+.q-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.q-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 16px; transition: all .3s;
 }
-.tier.on {
+.q-card.q-done { border-color: var(--g); background: linear-gradient(135deg, rgba(34,197,94,.06), rgba(6,182,212,.03)); }
+.q-card.q-pulse { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 16px rgba(34,197,94,.12); } }
+.q-hdr {
+  font-weight: 600; font-size: .88em; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.q-check { color: var(--g); font-weight: 700; }
+.q-xp {
+  margin-left: auto; font-size: .78em; font-family: var(--mono);
+  color: var(--g); font-weight: 600;
+}
+.q-desc { color: var(--sub); font-size: .8em; margin-bottom: 8px; }
+.q-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; }
+.q-pill {
+  font-size: .7em; padding: 2px 8px; border-radius: 12px;
+  background: rgba(255,255,255,.04); border: 1px solid var(--border);
+  color: var(--muted); font-family: var(--mono);
+}
+.q-pill.active { background: rgba(34,197,94,.12); border-color: var(--g); color: var(--g); }
+.q-bar {
+  height: 6px; border-radius: 3px; background: rgba(255,255,255,.06); overflow: hidden;
+  margin-bottom: 4px;
+}
+.q-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--g), var(--cyan));
+  transition: width .5s;
+}
+.q-stat { font-size: .7em; color: var(--muted); font-family: var(--mono); text-align: right; }
+.q-timer {
+  text-align: center; margin-top: 12px; font-size: .78em;
+  color: var(--warn); font-family: var(--mono); font-weight: 500;
+}
+
+/* ── Skill Cards ──────────────────────────── */
+.sk-wall { display: flex; flex-direction: column; gap: 18px; }
+.sk-group-hdr {
+  font-size: .78em; font-weight: 600; color: var(--sub); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: 10px; font-family: var(--mono);
+  padding-bottom: 4px; border-bottom: 1px solid rgba(148,163,184,.08);
+}
+.sk-group-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.sk-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 14px; display: grid; grid-template-columns: auto 1fr; gap: 8px 12px;
+  align-items: center; transition: all .25s;
+}
+.sk-card:hover { border-color: rgba(34,197,94,.25); transform: translateY(-2px); }
+.sk-card.maxed { border-color: rgba(245,158,11,.3); }
+.sk-icon { font-size: 1.8em; grid-row: span 2; }
+.sk-info { display: flex; justify-content: space-between; align-items: baseline; }
+.sk-name { font-weight: 600; font-size: .88em; }
+.sk-lvl { font-family: var(--mono); font-weight: 700; color: var(--g); font-size: .85em; }
+.sk-max { font-weight: 400; color: var(--muted); font-size: .8em; }
+.sk-bar {
+  grid-column: 2; height: 5px; border-radius: 3px; background: rgba(255,255,255,.06);
+  overflow: hidden;
+}
+.sk-fill {
+  height: 100%; border-radius: 3px;
+  background: linear-gradient(90deg, var(--g), var(--cyan)); transition: width .5s;
+}
+.sk-pwr {
+  grid-column: 2; font-size: .7em; color: var(--sub); font-family: var(--mono);
+  text-align: right;
+}
+
+/* ── League Bar ───────────────────────────── */
+.lg-bar { display: flex; gap: 4px; overflow-x: auto; }
+.lg-item {
+  flex: 1; min-width: 60px; text-align: center; padding: 12px 4px;
+  border-radius: var(--r-sm); background: var(--surface);
+  border: 1px solid var(--border); opacity: .4; transition: all .25s;
+}
+.lg-item.on {
   opacity: 1; border-color: var(--g);
-  box-shadow: 0 0 12px var(--g-dim), inset 0 0 20px var(--g-dim);
+  box-shadow: 0 0 14px var(--g-dim), inset 0 0 20px var(--g-dim);
+  background: linear-gradient(135deg, rgba(34,197,94,.08), rgba(6,182,212,.04));
 }
-.tier-icon { display: block; font-size: 1.3em; }
-.tier-name { display: block; font-size: .6em; color: var(--sub); margin-top: 2px; }
-.tier-req { display: block; font-size: .55em; color: var(--muted); font-family: var(--mono); }
+.lg-icon { display: block; font-size: 1.4em; }
+.lg-name { display: block; font-size: .6em; color: var(--sub); margin-top: 3px; font-family: var(--mono); }
 
-/* ── Heatmap ────────────────────────────────────── */
+/* ── Heatmap ──────────────────────────────── */
 .hm-grid {
-  display: grid;
-  grid-template-rows: repeat(7, 1fr);
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 3px;
+  display: grid; grid-template-rows: repeat(7, 1fr);
+  grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px;
 }
 .hm-cell { aspect-ratio: 1; border-radius: 3px; min-width: 0; transition: transform .1s; }
 .hm-cell:hover { transform: scale(1.4); z-index: 1; }
@@ -585,54 +729,70 @@ a:hover { color: var(--cyan); }
 .hm-2 { background: #047857; }
 .hm-3 { background: #10b981; box-shadow: 0 0 4px rgba(16,185,129,.3); }
 .hm-4 { background: #34d399; box-shadow: 0 0 6px rgba(52,211,153,.4); }
-
 .hm-legend {
-  display: flex; align-items: center; gap: 4px;
-  justify-content: flex-end; margin-top: 10px;
-  font-size: .7em; color: var(--muted); font-family: var(--mono);
+  display: flex; align-items: center; gap: 4px; justify-content: flex-end;
+  margin-top: 10px; font-size: .7em; color: var(--muted); font-family: var(--mono);
 }
 .hm-legend .hm-cell { width: 12px; height: 12px; display: inline-block; border-radius: 2px; }
 
-/* ── Badges ─────────────────────────────────────── */
-.badge-cat { margin-bottom: 16px; }
-.badge-cat:last-child { margin-bottom: 0; }
-.cat-title {
-  font-size: .75em; font-weight: 600; color: var(--sub);
-  text-transform: uppercase; letter-spacing: .08em;
-  margin-bottom: 8px; padding-bottom: 4px;
-  border-bottom: 1px solid rgba(148,163,184,.08);
-  font-family: var(--mono);
+/* ── Badges (multi-tier) ─────────────────── */
+.bdg-cat { margin-bottom: 16px; }
+.bdg-cat:last-child { margin-bottom: 0; }
+.bdg-cat-title {
+  font-size: .75em; font-weight: 600; color: var(--sub); text-transform: uppercase;
+  letter-spacing: .08em; margin-bottom: 8px; padding-bottom: 4px;
+  border-bottom: 1px solid rgba(148,163,184,.08); font-family: var(--mono);
 }
-.badge-row {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px;
-}
-.badge {
-  text-align: center; padding: 12px 6px; border-radius: var(--r-sm);
+.bdg-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+.bdg {
+  text-align: center; padding: 12px 8px; border-radius: var(--r-sm);
   border: 1px solid var(--border); cursor: default; transition: all .2s;
 }
-.badge.unlocked {
-  background: linear-gradient(135deg, rgba(34,197,94,.06), rgba(6,182,212,.04));
-  border-color: rgba(34,197,94,.25);
+.bdg:hover:not(.bdg-locked) { transform: translateY(-3px); }
+.bdg-bronze { border-color: #92400e; background: linear-gradient(135deg, rgba(146,64,14,.1), transparent); }
+.bdg-bronze:hover { box-shadow: 0 6px 18px rgba(146,64,14,.2); }
+.bdg-silver { border-color: #6b7280; background: linear-gradient(135deg, rgba(107,114,128,.1), transparent); }
+.bdg-silver:hover { box-shadow: 0 6px 18px rgba(107,114,128,.2); }
+.bdg-gold { border-color: #d97706; background: linear-gradient(135deg, rgba(217,119,6,.1), transparent); }
+.bdg-gold:hover { box-shadow: 0 6px 18px rgba(217,119,6,.2); }
+.bdg-diamond { border-color: #06b6d4; background: linear-gradient(135deg, rgba(6,182,212,.08), transparent); }
+.bdg-diamond:hover { box-shadow: 0 6px 18px rgba(6,182,212,.2); }
+.bdg-legend {
+  border-color: #a855f7;
+  background: linear-gradient(135deg, rgba(168,85,247,.1), rgba(236,72,153,.06));
+  box-shadow: 0 0 10px rgba(168,85,247,.15);
 }
-.badge.unlocked:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(34,197,94,.15);
-  border-color: var(--g);
+.bdg-legend:hover { box-shadow: 0 6px 24px rgba(168,85,247,.3); }
+.bdg-locked { background: rgba(255,255,255,.02); opacity: .3; }
+.bdg-icon { font-size: 1.6em; margin-bottom: 4px; }
+.bdg-name { font-size: .62em; color: var(--sub); line-height: 1.3; margin-bottom: 3px; }
+.bdg-stars { font-size: .6em; margin-bottom: 4px; }
+.bdg-bar {
+  height: 4px; border-radius: 2px; background: rgba(255,255,255,.06);
+  overflow: hidden; margin: 0 4px 3px;
 }
-.badge.locked { background: rgba(255,255,255,.02); opacity: .35; }
-.b-icon { display: block; font-size: 1.7em; margin-bottom: 4px; }
-.b-name {
-  display: block; font-size: .6em; color: var(--muted);
-  line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+.bdg-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--g), var(--cyan)); transition: width .5s;
 }
-.badge.unlocked .b-name { color: var(--sub); }
+.bdg-tier { font-size: .55em; color: var(--muted); font-family: var(--mono); }
 
-/* ── Tasks ──────────────────────────────────────── */
+/* ── Personal Records ─────────────────────── */
+.rec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.rec-card {
+  text-align: center; padding: 18px 10px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-sm); transition: all .25s;
+}
+.rec-card:hover { border-color: rgba(34,197,94,.25); transform: translateY(-2px); }
+.rec-icon { font-size: 1.6em; margin-bottom: 6px; }
+.rec-val { font-size: 1.2em; font-weight: 700; color: var(--g); font-family: var(--mono); }
+.rec-label { font-size: .7em; color: var(--muted); margin-top: 2px; }
+
+/* ── Tasks ─────────────────────────────────── */
 .tlist { display: flex; flex-direction: column; gap: 6px; }
 .trow {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px; background: var(--surface);
-  border-radius: var(--r-sm); font-size: .84em;
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px;
+  background: var(--surface); border-radius: var(--r-sm); font-size: .84em;
   border: 1px solid var(--border); transition: border-color .2s;
 }
 .trow:hover { border-color: rgba(34,197,94,.2); }
@@ -648,42 +808,34 @@ a:hover { color: var(--cyan); }
 .cx-high { background: rgba(244,63,94,.12); color: #fb7185; }
 .empty { color: var(--muted); text-align: center; padding: 24px; font-size: .9em; }
 
-/* ── Footer ─────────────────────────────────────── */
+/* Footer */
 .foot {
-  text-align: center; padding: 32px 0 16px;
-  color: var(--muted); font-size: .72em;
-  font-family: var(--mono);
+  text-align: center; padding: 32px 0 16px; color: var(--muted);
+  font-size: .72em; font-family: var(--mono);
 }
 .foot p + p { margin-top: 4px; }
 .foot a { color: var(--g); }
 
-/* ── Responsive ─────────────────────────────────── */
+/* ── Responsive ───────────────────────────── */
 @media (max-width: 720px) {
-  .hero {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 16px;
-    padding: 24px 20px;
-  }
-  .hero-avatar { justify-self: center; }
+  .hero { grid-template-columns: 1fr; text-align: center; gap: 16px; padding: 24px 20px; }
+  .hero-left { justify-self: center; }
   .hero-stats { flex-direction: row; flex-wrap: wrap; justify-content: center; }
   .hs { min-width: 80px; }
-  .grid2 { grid-template-columns: 1fr; }
+  .q-row { grid-template-columns: 1fr; }
+  .sk-group-cards { grid-template-columns: 1fr; }
+  .rec-grid { grid-template-columns: repeat(2, 1fr); }
 }
-
 @media (max-width: 480px) {
   .shell { padding: 12px 14px 32px; }
   .nav { flex-wrap: wrap; gap: 8px; }
-  .hero-name { font-size: 1.5em; }
-  .tiers { flex-wrap: wrap; }
-  .tier { min-width: 60px; }
+  .power-num { font-size: 2.2em; }
+  .lg-bar { flex-wrap: wrap; }
+  .lg-item { min-width: 50px; }
 }
 
-/* ── Animations ─────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+/* Animations */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
 .hero { animation: fadeUp .6s ease-out; }
 .card { animation: fadeUp .6s ease-out backwards; }
 .card:nth-child(1) { animation-delay: .1s; }
@@ -691,6 +843,8 @@ a:hover { color: var(--cyan); }
 .card:nth-child(3) { animation-delay: .2s; }
 .card:nth-child(4) { animation-delay: .25s; }
 .card:nth-child(5) { animation-delay: .3s; }
+.card:nth-child(6) { animation-delay: .35s; }
+.card:nth-child(7) { animation-delay: .4s; }
 """
 
 
@@ -700,9 +854,12 @@ def main():
     c = load_json(DATA_DIR / "config.json")
     ci = load_json(DATA_DIR / "check_ins.json")
 
+    quests_path = DATA_DIR / "daily_quests.json"
+    q = load_json(quests_path) if quests_path.exists() else {"combo": {}, "challenge": {}, "streak": {}}
+
     for lang in c["supported_languages"]:
         filename = "index.html" if lang == "en" else f"index_{lang}.html"
-        html = generate_dashboard(u, t, c, ci, lang)
+        html = generate_dashboard(u, t, c, ci, q, lang)
         with open(OUTPUT_DIR / filename, "w", encoding="utf-8") as f:
             f.write(html)
         print(f"[generate] Written {filename}")

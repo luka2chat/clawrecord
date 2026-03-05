@@ -2,9 +2,10 @@
   "username": "luka2chat",
   "level": 1,
   "xp": 201,
+  "claw_power": 1201,
   "weekly_xp": 201,
-  "streak": 1,
-  "badge_count": 5,
+  "streak": 0,
+  "badge_count": 9,
   "top_skills": [
     {
       "id": "coding",
@@ -15,12 +16,12 @@
       "level": 0
     },
     {
-      "id": "research",
+      "id": "automation",
       "level": 0
     }
   ],
   "league": "bronze",
   "avatar": "🥚",
-  "last_updated": "2026-03-03T16:14:24.523129Z",
-  "signature": "sha256:13c8a52721b0d0a82bfe92d82161ec0861da9fecd0b33e53e56bbb1435381459"
+  "last_updated": "2026-03-05T15:47:35.912564Z",
+  "signature": "sha256:3f50ef132aa7a7d8feabffae61fb58379e84ca65a84a468e88a005433aacf765"
 }

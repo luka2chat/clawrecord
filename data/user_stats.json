@@ -2,12 +2,15 @@
   "username": "luka2chat",
   "level": 1,
   "xp": 201,
+  "today_xp": 0,
   "xp_to_next_level": 500,
   "weekly_xp": 201,
-  "streak": 1,
+  "streak": 0,
   "streak_freezes": 0,
+  "streak_multiplier": 1.0,
   "hp": 100,
   "max_hp": 100,
+  "claw_power": 1201,
   "rank": "Novice Tamer",
   "avatar": "🥚",
   "league": {
@@ -16,43 +19,161 @@
   },
   "badges": [
     {
-      "id": "first_session",
-      "name": "First Steps",
+      "id": "sessions",
+      "name": "Session Runner",
       "icon": "👣",
-      "date": "2026-03-03"
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "First Steps",
+      "metric": 2,
+      "next_tier_value": 10,
+      "date": "2026-03-05"
     },
     {
-      "id": "first_tool",
-      "name": "Tool User",
+      "id": "tokens",
+      "name": "Token Consumer",
+      "icon": "💰",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Token Starter",
+      "metric": 394507,
+      "next_tier_value": 500000,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "tools",
+      "name": "Tool Wielder",
       "icon": "🔧",
-      "date": "2026-03-03"
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "First Tool",
+      "metric": 16,
+      "next_tier_value": 50,
+      "date": "2026-03-05"
     },
     {
-      "id": "first_telegram",
+      "id": "tool_types",
+      "name": "Swiss Army Knife",
+      "icon": "🗡️",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Versatile",
+      "metric": 3,
+      "next_tier_value": 5,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "shell_cmd",
+      "name": "Shell Commander",
+      "icon": "🖥️",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Shell User",
+      "metric": 11,
+      "next_tier_value": 20,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "productive",
+      "name": "Productivity Beast",
+      "icon": "🚀",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Busy Day",
+      "metric": 38,
+      "next_tier_value": 50,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "telegram",
       "name": "Telegram Pioneer",
       "icon": "📱",
-      "date": "2026-03-03"
+      "tier": 1,
+      "max_tier": 1,
+      "tier_label": "Telegram Pioneer",
+      "metric": 1,
+      "next_tier_value": null,
+      "date": "2026-03-05"
     },
     {
       "id": "multi_channel",
       "name": "Multi-Channel",
       "icon": "📡",
+      "tier": 1,
+      "max_tier": 4,
+      "tier_label": "Dual Channel",
+      "metric": 2,
+      "next_tier_value": 3,
       "date": "2026-03-03"
     },
     {
       "id": "model_explorer",
       "name": "Model Explorer",
       "icon": "🔬",
+      "tier": 2,
+      "max_tier": 4,
+      "tier_label": "Model Explorer",
+      "metric": 4,
+      "next_tier_value": 5,
       "date": "2026-03-03"
     }
   ],
   "skills": {
-    "coding": 0,
-    "content": 0,
-    "research": 0,
-    "communication": 0,
-    "automation": 0,
-    "data": 0
+    "coding": {
+      "level": 0,
+      "xp": 139,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "core"
+    },
+    "content": {
+      "level": 0,
+      "xp": 0,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "core"
+    },
+    "automation": {
+      "level": 0,
+      "xp": 0,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "ops"
+    },
+    "data": {
+      "level": 0,
+      "xp": 0,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "ops"
+    },
+    "communication": {
+      "level": 0,
+      "xp": 0,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "social"
+    },
+    "research": {
+      "level": 0,
+      "xp": 0,
+      "power": 0,
+      "next_level_xp": 200,
+      "max_level": 10,
+      "group": "social"
+    }
+  },
+  "personal_records": {
+    "best_daily_xp": 201,
+    "best_daily_messages": 38,
+    "best_daily_tools": 16,
+    "best_session_turns": 5,
+    "longest_streak": 0
   },
   "last_check_in": "2026-03-02"
 }
