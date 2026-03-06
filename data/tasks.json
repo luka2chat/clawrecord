@@ -1,10 +1,34 @@
 [
   {
     "id": 1,
+    "date": "2026-03-01",
+    "type": "coding",
+    "description": "27 messages | 205 tool calls | skills: coding, communication, research",
+    "xp_gained": 1802,
+    "complexity": "high"
+  },
+  {
+    "id": 2,
     "date": "2026-03-02",
     "type": "coding",
-    "description": "10 messages | 16 tool calls | skills: coding",
-    "xp_gained": 201,
+    "description": "17 messages | 41 tool calls | skills: coding, communication, research",
+    "xp_gained": 513,
+    "complexity": "high"
+  },
+  {
+    "id": 3,
+    "date": "2026-03-05",
+    "type": "coding",
+    "description": "5 messages | 11 tool calls | skills: coding",
+    "xp_gained": 103,
+    "complexity": "medium"
+  },
+  {
+    "id": 4,
+    "date": "2026-03-06",
+    "type": "coding",
+    "description": "11 messages | 48 tool calls | skills: coding, research",
+    "xp_gained": 407,
     "complexity": "high"
   }
 ]

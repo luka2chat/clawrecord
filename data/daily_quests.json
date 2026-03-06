@@ -1,34 +1,37 @@
 {
-  "date": "2026-03-05",
+  "date": "2026-03-06",
   "combo": {
     "skills": [
+      "research",
       "coding",
-      "automation",
-      "data"
+      "automation"
     ],
-    "activated": 0,
-    "activated_skills": [],
+    "activated": 2,
+    "activated_skills": [
+      "research",
+      "coding"
+    ],
     "total": 3,
     "complete": false,
     "xp_reward": 100
   },
   "challenge": {
-    "id": "turns_30",
+    "id": "write_5",
     "name": {
-      "en": "Marathon",
-      "zh": "马拉松对话"
+      "en": "Author Mode",
+      "zh": "笔耕不辍"
     },
     "desc": {
-      "en": "{n}+ turn conversation",
-      "zh": "一次 {n}+ 轮对话"
+      "en": "Write/edit {n} files",
+      "zh": "写入/编辑 {n} 个文件"
     },
-    "target": 30,
-    "progress": 0,
+    "target": 5,
+    "progress": 3,
     "complete": false,
-    "xp_reward": 70
+    "xp_reward": 50
   },
   "streak": {
-    "active": false,
-    "complete": false
+    "active": true,
+    "complete": true
   }
 }

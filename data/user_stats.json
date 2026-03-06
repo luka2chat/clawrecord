@@ -1,21 +1,21 @@
 {
   "username": "luka2chat",
-  "level": 1,
-  "xp": 201,
-  "today_xp": 0,
-  "xp_to_next_level": 500,
-  "weekly_xp": 201,
-  "streak": 0,
+  "level": 5,
+  "xp": 2825,
+  "today_xp": 407,
+  "xp_to_next_level": 5000,
+  "weekly_xp": 1023,
+  "streak": 2,
   "streak_freezes": 0,
   "streak_multiplier": 1.0,
   "hp": 100,
   "max_hp": 100,
-  "claw_power": 1201,
-  "rank": "Novice Tamer",
-  "avatar": "🥚",
+  "claw_power": 7025,
+  "rank": "Assistant Tamer",
+  "avatar": "🐥",
   "league": {
-    "id": "bronze",
-    "icon": "🟤"
+    "id": "silver",
+    "icon": "🥈"
   },
   "badges": [
     {
@@ -25,64 +25,119 @@
       "tier": 1,
       "max_tier": 5,
       "tier_label": "First Steps",
-      "metric": 2,
+      "metric": 8,
       "next_tier_value": 10,
       "date": "2026-03-05"
+    },
+    {
+      "id": "messages",
+      "name": "Messenger",
+      "icon": "💬",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Chatty",
+      "metric": 60,
+      "next_tier_value": 200,
+      "date": "2026-03-06"
     },
     {
       "id": "tokens",
       "name": "Token Consumer",
       "icon": "💰",
-      "tier": 1,
+      "tier": 5,
       "max_tier": 5,
-      "tier_label": "Token Starter",
-      "metric": 394507,
-      "next_tier_value": 500000,
+      "tier_label": "Token Legend",
+      "metric": 24080713,
+      "next_tier_value": null,
       "date": "2026-03-05"
     },
     {
       "id": "tools",
       "name": "Tool Wielder",
       "icon": "🔧",
-      "tier": 1,
+      "tier": 3,
       "max_tier": 5,
-      "tier_label": "First Tool",
-      "metric": 16,
-      "next_tier_value": 50,
+      "tier_label": "Tool Expert",
+      "metric": 305,
+      "next_tier_value": 500,
       "date": "2026-03-05"
     },
     {
       "id": "tool_types",
       "name": "Swiss Army Knife",
       "icon": "🗡️",
-      "tier": 1,
+      "tier": 3,
       "max_tier": 5,
-      "tier_label": "Versatile",
-      "metric": 3,
-      "next_tier_value": 5,
+      "tier_label": "Arsenal",
+      "metric": 11,
+      "next_tier_value": 12,
       "date": "2026-03-05"
+    },
+    {
+      "id": "coding_skill",
+      "name": "Code Wizard",
+      "icon": "🧙",
+      "tier": 4,
+      "max_tier": 5,
+      "tier_label": "Architect",
+      "metric": 8,
+      "next_tier_value": 10,
+      "date": "2026-03-06"
     },
     {
       "id": "shell_cmd",
       "name": "Shell Commander",
       "icon": "🖥️",
-      "tier": 1,
+      "tier": 4,
       "max_tier": 5,
-      "tier_label": "Shell User",
-      "metric": 11,
-      "next_tier_value": 20,
+      "tier_label": "Shell Master",
+      "metric": 117,
+      "next_tier_value": 200,
       "date": "2026-03-05"
+    },
+    {
+      "id": "writer",
+      "name": "Author",
+      "icon": "🖊️",
+      "tier": 2,
+      "max_tier": 5,
+      "tier_label": "Writer",
+      "metric": 41,
+      "next_tier_value": 50,
+      "date": "2026-03-06"
+    },
+    {
+      "id": "browser",
+      "name": "Web Explorer",
+      "icon": "🌐",
+      "tier": 2,
+      "max_tier": 5,
+      "tier_label": "Surfer",
+      "metric": 20,
+      "next_tier_value": 30,
+      "date": "2026-03-06"
     },
     {
       "id": "productive",
       "name": "Productivity Beast",
       "icon": "🚀",
+      "tier": 5,
+      "max_tier": 5,
+      "tier_label": "Unstoppable",
+      "metric": 258,
+      "next_tier_value": null,
+      "date": "2026-03-05"
+    },
+    {
+      "id": "marathon",
+      "name": "Marathon Runner",
+      "icon": "🏃",
       "tier": 1,
       "max_tier": 5,
-      "tier_label": "Busy Day",
-      "metric": 38,
-      "next_tier_value": 50,
-      "date": "2026-03-05"
+      "tier_label": "Long Chat",
+      "metric": 20,
+      "next_tier_value": 25,
+      "date": "2026-03-06"
     },
     {
       "id": "telegram",
@@ -99,31 +154,42 @@
       "id": "multi_channel",
       "name": "Multi-Channel",
       "icon": "📡",
-      "tier": 1,
+      "tier": 2,
       "max_tier": 4,
-      "tier_label": "Dual Channel",
-      "metric": 2,
-      "next_tier_value": 3,
+      "tier_label": "Tri Channel",
+      "metric": 3,
+      "next_tier_value": 4,
       "date": "2026-03-03"
     },
     {
       "id": "model_explorer",
       "name": "Model Explorer",
       "icon": "🔬",
-      "tier": 2,
+      "tier": 3,
       "max_tier": 4,
-      "tier_label": "Model Explorer",
-      "metric": 4,
-      "next_tier_value": 5,
+      "tier_label": "Model Collector",
+      "metric": 6,
+      "next_tier_value": 8,
       "date": "2026-03-03"
+    },
+    {
+      "id": "level_up",
+      "name": "Level Master",
+      "icon": "⬆️",
+      "tier": 1,
+      "max_tier": 5,
+      "tier_label": "Rising Star",
+      "metric": 5,
+      "next_tier_value": 10,
+      "date": "2026-03-06"
     }
   ],
   "skills": {
     "coding": {
-      "level": 0,
-      "xp": 139,
-      "power": 0,
-      "next_level_xp": 200,
+      "level": 8,
+      "xp": 1719,
+      "power": 160,
+      "next_level_xp": 1800,
       "max_level": 10,
       "group": "core"
     },
@@ -153,27 +219,28 @@
     },
     "communication": {
       "level": 0,
-      "xp": 0,
+      "xp": 128,
       "power": 0,
       "next_level_xp": 200,
       "max_level": 10,
       "group": "social"
     },
     "research": {
-      "level": 0,
-      "xp": 0,
-      "power": 0,
-      "next_level_xp": 200,
+      "level": 1,
+      "xp": 349,
+      "power": 15,
+      "next_level_xp": 400,
       "max_level": 10,
       "group": "social"
     }
   },
   "personal_records": {
-    "best_daily_xp": 201,
-    "best_daily_messages": 38,
-    "best_daily_tools": 16,
-    "best_session_turns": 5,
-    "longest_streak": 0
+    "best_daily_xp": 1802,
+    "best_daily_messages": 258,
+    "best_daily_tools": 205,
+    "best_session_turns": 20,
+    "best_daily_tokens": 12414616,
+    "longest_streak": 2
   },
-  "last_check_in": "2026-03-02"
+  "last_check_in": "2026-03-06"
 }

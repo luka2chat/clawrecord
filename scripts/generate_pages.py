@@ -17,6 +17,185 @@ from utils import DATA_DIR, OUTPUT_DIR, get_text, load_json
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 
+# ── Usage Analytics Panel ─────────────────────────────────────────
+
+def build_usage_analytics(analytics, config, lang):
+    """Build the Usage Analytics section with charts and stats."""
+    ui = {k: get_text(v, lang) for k, v in config["ui_text"].items()}
+
+    tokens_total = analytics.get("tokens_total", 0)
+    tokens_input = analytics.get("tokens_input", 0)
+    tokens_output = analytics.get("tokens_output", 0)
+    cost_total = analytics.get("cost_total", 0)
+    cache_hit = analytics.get("cache_hit_rate", 0)
+    avg_cost = analytics.get("avg_cost_per_day", 0)
+    cost_per_1k = analytics.get("cost_per_1k_tokens", 0)
+    avg_tok_msg = analytics.get("avg_tokens_per_msg", 0)
+    active_days = analytics.get("active_days", 0)
+    total_sessions = analytics.get("total_sessions", 0)
+
+    def fmt_tokens(n):
+        if n >= 1_000_000:
+            return f"{n/1_000_000:.1f}M"
+        if n >= 1_000:
+            return f"{n/1_000:.1f}K"
+        return str(n)
+
+    stats_cards = (
+        f'<div class="ua-stats">'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">{fmt_tokens(tokens_total)}</div>'
+        f'<div class="ua-stat-key">Total Tokens</div></div>'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">${cost_total:.2f}</div>'
+        f'<div class="ua-stat-key">Total Cost</div></div>'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">{cache_hit}%</div>'
+        f'<div class="ua-stat-key">Cache Hit</div></div>'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">${avg_cost:.3f}</div>'
+        f'<div class="ua-stat-key">Cost/Day</div></div>'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">{fmt_tokens(avg_tok_msg)}</div>'
+        f'<div class="ua-stat-key">Tok/Msg</div></div>'
+        f'<div class="ua-stat">'
+        f'<div class="ua-stat-val">{total_sessions}</div>'
+        f'<div class="ua-stat-key">Sessions</div></div>'
+        f'</div>'
+    )
+
+    colors = ["#22c55e", "#06b6d4", "#6366f1", "#f59e0b", "#f43f5e", "#a855f7", "#ec4899", "#14b8a6"]
+
+    model_share = analytics.get("model_share", {})
+    model_tokens_data = analytics.get("model_tokens", {})
+    model_items = sorted(model_share.items(), key=lambda x: x[1], reverse=True)
+    model_bars = ""
+    for i, (model, pct) in enumerate(model_items):
+        color = colors[i % len(colors)]
+        short_name = model.split("/")[-1] if "/" in model else model
+        tok_str = fmt_tokens(model_tokens_data.get(model, 0))
+        if pct > 0:
+            model_bars += (
+                f'<div class="ua-bar-item">'
+                f'<div class="ua-bar-label">{short_name}</div>'
+                f'<div class="ua-bar-track"><div class="ua-bar-fill" style="width:{pct}%;background:{color}"></div></div>'
+                f'<div class="ua-bar-pct">{pct}% ({tok_str})</div>'
+                f'</div>'
+            )
+
+    provider_share = analytics.get("provider_share", {})
+    provider_tokens_data = analytics.get("provider_tokens", {})
+    provider_items = sorted(provider_share.items(), key=lambda x: x[1], reverse=True)
+    provider_bars = ""
+    for i, (provider, pct) in enumerate(provider_items):
+        color = colors[(i + 3) % len(colors)]
+        tok_str = fmt_tokens(provider_tokens_data.get(provider, 0))
+        if pct > 0:
+            provider_bars += (
+                f'<div class="ua-bar-item">'
+                f'<div class="ua-bar-label">{provider}</div>'
+                f'<div class="ua-bar-track"><div class="ua-bar-fill" style="width:{pct}%;background:{color}"></div></div>'
+                f'<div class="ua-bar-pct">{pct}% ({tok_str})</div>'
+                f'</div>'
+            )
+
+    top_tools = analytics.get("top_tools", [])
+    max_tool_count = max((t["count"] for t in top_tools), default=1)
+    tool_bars = ""
+    for i, t in enumerate(top_tools[:8]):
+        color = colors[i % len(colors)]
+        pct = t["count"] / max(max_tool_count, 1) * 100
+        tool_bars += (
+            f'<div class="ua-bar-item">'
+            f'<div class="ua-bar-label">{t["name"]}</div>'
+            f'<div class="ua-bar-track"><div class="ua-bar-fill" style="width:{pct:.0f}%;background:{color}"></div></div>'
+            f'<div class="ua-bar-pct">{t["count"]:,}</div>'
+            f'</div>'
+        )
+
+    channel_msgs = analytics.get("channel_messages", {})
+    ch_items = sorted(channel_msgs.items(), key=lambda x: x[1], reverse=True)
+    ch_max = max(channel_msgs.values(), default=1)
+    channel_bars = ""
+    ch_icons = {"telegram": "\U0001f4e8", "webchat": "\U0001f4bb", "discord": "\U0001f3ae", "slack": "\U0001f4ac"}
+    for i, (ch, count) in enumerate(ch_items):
+        icon = ch_icons.get(ch, "\U0001f310")
+        pct = count / max(ch_max, 1) * 100
+        channel_bars += (
+            f'<div class="ua-bar-item">'
+            f'<div class="ua-bar-label">{icon} {ch}</div>'
+            f'<div class="ua-bar-track"><div class="ua-bar-fill" style="width:{pct:.0f}%;background:{colors[i%len(colors)]}"></div></div>'
+            f'<div class="ua-bar-pct">{count}</div>'
+            f'</div>'
+        )
+
+    trend = analytics.get("daily_trend", [])
+    if trend:
+        max_tokens = max((d["tokens"] for d in trend), default=1)
+        spark_bars = ""
+        for d in trend:
+            h = max(d["tokens"] / max(max_tokens, 1) * 100, 2) if d["tokens"] > 0 else 2
+            spark_bars += (
+                f'<div class="ua-spark-bar" style="height:{h:.0f}%" '
+                f'title="{d["date"]}: {fmt_tokens(d["tokens"])} tok, ${d["cost"]:.3f}">'
+                f'</div>'
+            )
+        spark_html = (
+            f'<div class="ua-sub-title">Daily Token Trend</div>'
+            f'<div class="ua-spark">{spark_bars}</div>'
+            f'<div class="ua-spark-labels">'
+            f'<span>{trend[0]["date"][-5:]}</span>'
+            f'<span>{trend[-1]["date"][-5:]}</span></div>'
+        )
+    else:
+        spark_html = ""
+
+    token_split_html = ""
+    if tokens_total > 0:
+        in_pct = round(tokens_input / max(tokens_total, 1) * 100, 1)
+        out_pct = round(tokens_output / max(tokens_total, 1) * 100, 1)
+        cache_pct = cache_hit
+        token_split_html = (
+            f'<div class="ua-sub-title">Token Breakdown</div>'
+            f'<div class="ua-split-bar">'
+            f'<div class="ua-split-seg" style="width:{in_pct}%;background:#6366f1" title="Input: {in_pct}%"></div>'
+            f'<div class="ua-split-seg" style="width:{out_pct}%;background:#22c55e" title="Output: {out_pct}%"></div>'
+            f'<div class="ua-split-seg" style="width:{cache_pct}%;background:#06b6d4" title="Cache: {cache_pct}%"></div>'
+            f'</div>'
+            f'<div class="ua-split-legend">'
+            f'<span class="ua-leg"><span class="ua-dot" style="background:#6366f1"></span>Input {in_pct}%</span>'
+            f'<span class="ua-leg"><span class="ua-dot" style="background:#22c55e"></span>Output {out_pct}%</span>'
+            f'<span class="ua-leg"><span class="ua-dot" style="background:#06b6d4"></span>Cache {cache_pct}%</span>'
+            f'</div>'
+        )
+
+    return (
+        f'{stats_cards}'
+        f'<div class="ua-panels">'
+        f'<div class="ua-panel">'
+        f'<div class="ua-sub-title">\U0001f916 Models</div>'
+        f'{model_bars}'
+        f'</div>'
+        f'<div class="ua-panel">'
+        f'<div class="ua-sub-title">\u2601\ufe0f Providers</div>'
+        f'{provider_bars}'
+        f'</div>'
+        f'</div>'
+        f'{token_split_html}'
+        f'{spark_html}'
+        f'<div class="ua-panels">'
+        f'<div class="ua-panel">'
+        f'<div class="ua-sub-title">\U0001f527 Top Tools</div>'
+        f'{tool_bars}'
+        f'</div>'
+        f'<div class="ua-panel">'
+        f'<div class="ua-sub-title">\U0001f4e1 Channels</div>'
+        f'{channel_bars}'
+        f'</div>'
+        f'</div>'
+    )
+
+
 # ── Heatmap ────────────────────────────────────────────────────────
 
 def build_heatmap(check_ins, lang):
@@ -302,7 +481,7 @@ def build_records(records, config, lang):
 
 # ── Dashboard HTML ─────────────────────────────────────────────────
 
-def generate_dashboard(user_stats, tasks, config, check_ins, quests, lang):
+def generate_dashboard(user_stats, tasks, config, check_ins, quests, analytics, lang):
     ui = {k: get_text(v, lang) for k, v in config["ui_text"].items()}
 
     level_info = next(
@@ -338,6 +517,7 @@ def generate_dashboard(user_stats, tasks, config, check_ins, quests, lang):
     badges_html = build_badges(user_stats.get("badges", []), config, lang)
     records = user_stats.get("personal_records", {})
     records_html = build_records(records, config, lang)
+    usage_analytics_html = build_usage_analytics(analytics, config, lang)
 
     claw_power = user_stats.get("claw_power", 0)
     today_xp = user_stats.get("today_xp", 0)
@@ -445,6 +625,11 @@ def generate_dashboard(user_stats, tasks, config, check_ins, quests, lang):
     <div class="hm-cell hm-0"></div><div class="hm-cell hm-1"></div><div class="hm-cell hm-2"></div><div class="hm-cell hm-3"></div><div class="hm-cell hm-4"></div>
     <span>{ui["more"]}</span>
   </div>
+</section>
+
+<section class="card card-usage">
+  <h2>\U0001f4ca Usage Analytics</h2>
+  {usage_analytics_html}
 </section>
 
 <section class="card card-badges">
@@ -735,6 +920,65 @@ a:hover { color: var(--cyan); }
 }
 .hm-legend .hm-cell { width: 12px; height: 12px; display: inline-block; border-radius: 2px; }
 
+/* ── Usage Analytics ─────────────────────── */
+.ua-stats {
+  display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px;
+}
+.ua-stat {
+  text-align: center; padding: 14px 8px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+}
+.ua-stat-val { font-size: 1.1em; font-weight: 700; color: var(--g); font-family: var(--mono); }
+.ua-stat-key { font-size: .6em; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+.ua-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.ua-panel {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-sm);
+  padding: 16px;
+}
+.ua-sub-title {
+  font-size: .78em; font-weight: 600; color: var(--sub); margin-bottom: 12px;
+  font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em;
+}
+.ua-bar-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.ua-bar-item:last-child { margin-bottom: 0; }
+.ua-bar-label {
+  min-width: 80px; font-size: .72em; color: var(--sub); font-family: var(--mono);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.ua-bar-track {
+  flex: 1; height: 8px; border-radius: 4px; background: rgba(255,255,255,.04);
+  overflow: hidden;
+}
+.ua-bar-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+.ua-bar-pct { font-size: .65em; color: var(--muted); font-family: var(--mono); min-width: 65px; text-align: right; }
+
+.ua-split-bar {
+  display: flex; height: 14px; border-radius: 7px; overflow: hidden; margin-bottom: 8px;
+  background: rgba(255,255,255,.04);
+}
+.ua-split-seg { height: 100%; transition: width .5s; }
+.ua-split-legend {
+  display: flex; gap: 16px; margin-bottom: 16px; font-size: .7em; color: var(--sub);
+  font-family: var(--mono);
+}
+.ua-leg { display: flex; align-items: center; gap: 4px; }
+.ua-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+
+.ua-spark {
+  display: flex; align-items: flex-end; gap: 2px; height: 60px; margin-bottom: 4px;
+  padding: 0 2px;
+}
+.ua-spark-bar {
+  flex: 1; border-radius: 2px 2px 0 0; min-width: 2px;
+  background: linear-gradient(0deg, var(--g), var(--cyan)); opacity: .8;
+  transition: opacity .2s;
+}
+.ua-spark-bar:hover { opacity: 1; }
+.ua-spark-labels {
+  display: flex; justify-content: space-between; font-size: .6em; color: var(--muted);
+  font-family: var(--mono); margin-bottom: 16px;
+}
+
 /* ── Badges (multi-tier) ─────────────────── */
 .bdg-cat { margin-bottom: 16px; }
 .bdg-cat:last-child { margin-bottom: 0; }
@@ -777,8 +1021,7 @@ a:hover { color: var(--cyan); }
 }
 .bdg-tier { font-size: .55em; color: var(--muted); font-family: var(--mono); }
 
-/* ── Personal Records ─────────────────────── */
-.rec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+/* ── Personal Records ─────────────────────── */.rec-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .rec-card {
   text-align: center; padding: 18px 10px; background: var(--surface);
   border: 1px solid var(--border); border-radius: var(--r-sm); transition: all .25s;
@@ -825,6 +1068,8 @@ a:hover { color: var(--cyan); }
   .q-row { grid-template-columns: 1fr; }
   .sk-group-cards { grid-template-columns: 1fr; }
   .rec-grid { grid-template-columns: repeat(2, 1fr); }
+  .ua-stats { grid-template-columns: repeat(3, 1fr); }
+  .ua-panels { grid-template-columns: 1fr; }
 }
 @media (max-width: 480px) {
   .shell { padding: 12px 14px 32px; }
@@ -857,9 +1102,12 @@ def main():
     quests_path = DATA_DIR / "daily_quests.json"
     q = load_json(quests_path) if quests_path.exists() else {"combo": {}, "challenge": {}, "streak": {}}
 
+    analytics_path = DATA_DIR / "usage_analytics.json"
+    a = load_json(analytics_path) if analytics_path.exists() else {}
+
     for lang in c["supported_languages"]:
         filename = "index.html" if lang == "en" else f"index_{lang}.html"
-        html = generate_dashboard(u, t, c, ci, q, lang)
+        html = generate_dashboard(u, t, c, ci, q, a, lang)
         with open(OUTPUT_DIR / filename, "w", encoding="utf-8") as f:
             f.write(html)
         print(f"[generate] Written {filename}")

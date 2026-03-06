@@ -1,31 +1,104 @@
 {
-  "collection_timestamp": "2026-03-03T16:14:24.395622Z",
+  "collection_timestamp": "2026-03-06T13:53:45.067988Z",
   "daily": {
-    "2026-03-02": {
+    "2026-03-01": {
       "sessions": 2,
       "messages": {
-        "user": 10,
-        "assistant": 28
+        "user": 27,
+        "assistant": 231
+      },
+      "tool_calls": {
+        "exec": 81,
+        "write": 40,
+        "edit": 33,
+        "process": 39,
+        "read": 6,
+        "browser": 5,
+        "message": 1
+      },
+      "tool_calls_total": 205,
+      "tool_errors": 0,
+      "tokens": {
+        "input": 2029074,
+        "output": 122674,
+        "total": 12414616,
+        "cache_read": 10262868,
+        "cache_write": 0
+      },
+      "cost": 3.407534,
+      "cost_breakdown": {
+        "input": 1.616497,
+        "output": 0.762785,
+        "total": 3.407534
+      },
+      "skills_used": [
+        "coding",
+        "communication",
+        "research"
+      ],
+      "channels": [
+        "unknown"
+      ],
+      "models": [
+        "anthropic/claude-sonnet-4",
+        "google/gemini-2.5-flash"
+      ],
+      "providers": [
+        "openrouter"
+      ],
+      "model_tokens": {
+        "anthropic/claude-sonnet-4": 3077759,
+        "google/gemini-2.5-flash": 9336857
+      },
+      "provider_tokens": {
+        "openrouter": 12414616
+      },
+      "hours_active": [
+        17,
+        18,
+        19,
+        20
+      ],
+      "max_turns_in_session": 20,
+      "commands": 0,
+      "first_message_at": "2026-03-01T17:48:36.775Z",
+      "last_message_at": "2026-03-01T20:02:41.777Z"
+    },
+    "2026-03-02": {
+      "sessions": 3,
+      "messages": {
+        "user": 17,
+        "assistant": 64
       },
       "tool_calls": {
         "read": 2,
-        "exec": 11,
-        "process": 3
+        "exec": 14,
+        "process": 6,
+        "browser": 15,
+        "message": 4
       },
-      "tool_calls_total": 16,
+      "tool_calls_total": 41,
       "tool_errors": 0,
       "tokens": {
-        "input": 94885,
-        "output": 14570,
-        "total": 394507
+        "input": 1039787,
+        "output": 33364,
+        "total": 4764995,
+        "cache_read": 3691844,
+        "cache_write": 0
       },
-      "cost": 0.017951,
+      "cost": 0.060559,
+      "cost_breakdown": {
+        "input": 0.052867,
+        "output": 0.007132,
+        "total": 0.060559
+      },
       "skills_used": [
-        "coding"
+        "coding",
+        "communication",
+        "research"
       ],
       "channels": [
-        "telegram",
-        "webchat"
+        "unknown"
       ],
       "models": [
         "bytedance-seed/seed-2.0-mini",
@@ -33,6 +106,20 @@
         "gateway-injected",
         "google/gemini-2.5-flash"
       ],
+      "providers": [
+        "openclaw",
+        "openrouter"
+      ],
+      "model_tokens": {
+        "gateway-injected": 0,
+        "google/gemini-2.5-flash": 197735,
+        "bytedance-seed/seed-2.0-mini": 4567260,
+        "delivery-mirror": 0
+      },
+      "provider_tokens": {
+        "openclaw": 0,
+        "openrouter": 4764995
+      },
       "hours_active": [
         11,
         12,
@@ -40,40 +127,194 @@
         14,
         15
       ],
-      "max_turns_in_session": 5,
+      "max_turns_in_session": 7,
       "commands": 1,
       "first_message_at": "2026-03-02T11:53:34.740Z",
       "last_message_at": "2026-03-02T15:07:59.494Z"
+    },
+    "2026-03-05": {
+      "sessions": 1,
+      "messages": {
+        "user": 5,
+        "assistant": 19
+      },
+      "tool_calls": {
+        "session_status": 1,
+        "read": 2,
+        "exec": 1,
+        "process": 7
+      },
+      "tool_calls_total": 11,
+      "tool_errors": 0,
+      "tokens": {
+        "input": 75602,
+        "output": 15884,
+        "total": 265414,
+        "cache_read": 173928,
+        "cache_write": 0
+      },
+      "cost": 0.013914,
+      "cost_breakdown": {
+        "input": 0.00756,
+        "output": 0.006354,
+        "total": 0.013914
+      },
+      "skills_used": [
+        "coding"
+      ],
+      "channels": [
+        "unknown"
+      ],
+      "models": [
+        "bytedance-seed/seed-2.0-mini",
+        "delivery-mirror"
+      ],
+      "providers": [
+        "openclaw",
+        "openrouter"
+      ],
+      "model_tokens": {
+        "bytedance-seed/seed-2.0-mini": 265414,
+        "delivery-mirror": 0
+      },
+      "provider_tokens": {
+        "openrouter": 265414,
+        "openclaw": 0
+      },
+      "hours_active": [
+        15
+      ],
+      "max_turns_in_session": 5,
+      "commands": 0,
+      "first_message_at": "2026-03-05T15:17:30.582Z",
+      "last_message_at": "2026-03-05T15:36:03.397Z"
+    },
+    "2026-03-06": {
+      "sessions": 2,
+      "messages": {
+        "user": 11,
+        "assistant": 53
+      },
+      "tool_calls": {
+        "read": 11,
+        "web_search": 1,
+        "exec": 21,
+        "process": 9,
+        "session_status": 1,
+        "memory_search": 1,
+        "sessions_history": 1,
+        "edit": 2,
+        "write": 1
+      },
+      "tool_calls_total": 48,
+      "tool_errors": 0,
+      "tokens": {
+        "input": 6627384,
+        "output": 8304,
+        "total": 6635688,
+        "cache_read": 0,
+        "cache_write": 0
+      },
+      "cost": 0.0,
+      "cost_breakdown": {
+        "input": 0.0,
+        "output": 0.0,
+        "total": 0.0
+      },
+      "skills_used": [
+        "coding",
+        "research"
+      ],
+      "channels": [
+        "telegram",
+        "webchat"
+      ],
+      "models": [
+        "qwen3.5-plus"
+      ],
+      "providers": [
+        "bailian"
+      ],
+      "model_tokens": {
+        "qwen3.5-plus": 6635688
+      },
+      "provider_tokens": {
+        "bailian": 6635688
+      },
+      "hours_active": [
+        13
+      ],
+      "max_turns_in_session": 6,
+      "commands": 0,
+      "first_message_at": "2026-03-06T13:08:33.604Z",
+      "last_message_at": "2026-03-06T13:36:02.191Z"
     }
   },
   "totals": {
-    "sessions": 2,
-    "messages_user": 10,
-    "messages_assistant": 28,
-    "tool_calls_total": 16,
+    "sessions": 8,
+    "messages_user": 60,
+    "messages_assistant": 367,
+    "tool_calls_total": 305,
     "tool_errors_total": 0,
-    "tokens_total": 394507,
-    "cost_total": 0.017951,
+    "tokens_total": 24080713,
+    "tokens_input": 9771847,
+    "tokens_output": 180226,
+    "cache_read": 14128640,
+    "cache_write": 0,
+    "cost_total": 3.482007,
+    "cost_input": 1.676924,
+    "cost_output": 0.776271,
     "unique_skills": [
-      "coding"
+      "coding",
+      "communication",
+      "research"
     ],
     "unique_tools": [
+      "browser",
+      "edit",
       "exec",
+      "memory_search",
+      "message",
       "process",
-      "read"
+      "read",
+      "session_status",
+      "sessions_history",
+      "web_search",
+      "write"
     ],
     "unique_models": [
+      "anthropic/claude-sonnet-4",
       "bytedance-seed/seed-2.0-mini",
       "delivery-mirror",
       "gateway-injected",
-      "google/gemini-2.5-flash"
+      "google/gemini-2.5-flash",
+      "qwen3.5-plus"
+    ],
+    "unique_providers": [
+      "bailian",
+      "openclaw",
+      "openrouter"
     ],
     "unique_channels": [
       "telegram",
+      "unknown",
       "webchat"
     ],
-    "active_days": 1,
-    "first_activity": "2026-03-02",
-    "last_activity": "2026-03-02"
+    "model_tokens": {
+      "anthropic/claude-sonnet-4": 3077759,
+      "google/gemini-2.5-flash": 9534592,
+      "gateway-injected": 0,
+      "bytedance-seed/seed-2.0-mini": 4832674,
+      "delivery-mirror": 0,
+      "qwen3.5-plus": 6635688
+    },
+    "provider_tokens": {
+      "openrouter": 17445025,
+      "openclaw": 0,
+      "bailian": 6635688
+    },
+    "active_days": 4,
+    "first_activity": "2026-03-01",
+    "last_activity": "2026-03-06"
   }
 }

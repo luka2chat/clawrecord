@@ -201,6 +201,7 @@ def calc_personal_records(daily, config):
     best_daily_messages = 0
     best_daily_tools = 0
     best_session_turns = 0
+    best_daily_tokens = 0
 
     for date, day in daily.items():
         xp = calc_daily_xp(day, config)
@@ -211,12 +212,101 @@ def calc_personal_records(daily, config):
         best_daily_tools = max(best_daily_tools, tools)
         turns = day.get("max_turns_in_session", 0)
         best_session_turns = max(best_session_turns, turns)
+        tokens = day.get("tokens", {}).get("total", 0)
+        best_daily_tokens = max(best_daily_tokens, tokens)
 
     return {
         "best_daily_xp": best_daily_xp,
         "best_daily_messages": best_daily_messages,
         "best_daily_tools": best_daily_tools,
         "best_session_turns": best_session_turns,
+        "best_daily_tokens": best_daily_tokens,
+    }
+
+
+# ── Usage Analytics ────────────────────────────────────────────────
+
+def calc_usage_analytics(metrics):
+    """Compute rich usage analytics from collected metrics for UI display."""
+    daily = metrics["daily"]
+    totals = metrics["totals"]
+
+    model_tokens = totals.get("model_tokens", {})
+    provider_tokens = totals.get("provider_tokens", {})
+    tokens_total = totals.get("tokens_total", 0)
+
+    model_share = {}
+    for m, t in model_tokens.items():
+        model_share[m] = round(t / max(tokens_total, 1) * 100, 1)
+
+    provider_share = {}
+    for p, t in provider_tokens.items():
+        provider_share[p] = round(t / max(tokens_total, 1) * 100, 1)
+
+    daily_trend = []
+    for date in sorted(daily.keys()):
+        day = daily[date]
+        tok = day.get("tokens", {})
+        daily_trend.append({
+            "date": date,
+            "tokens": tok.get("total", 0),
+            "tokens_input": tok.get("input", 0),
+            "tokens_output": tok.get("output", 0),
+            "cache_read": tok.get("cache_read", 0),
+            "cost": day.get("cost", 0),
+            "messages": day["messages"]["user"] + day["messages"]["assistant"],
+            "tool_calls": sum(day.get("tool_calls", {}).values()),
+            "models_count": len(day.get("models", [])),
+        })
+
+    cache_read_total = totals.get("cache_read", 0)
+    cache_hit_rate = round(cache_read_total / max(tokens_total, 1) * 100, 1)
+
+    cost_total = totals.get("cost_total", 0)
+    active_days = totals.get("active_days", 1)
+    avg_cost_per_day = round(cost_total / max(active_days, 1), 4)
+    avg_tokens_per_msg = round(tokens_total / max(totals.get("messages_user", 1) + totals.get("messages_assistant", 1), 1))
+    cost_per_1k_tokens = round(cost_total / max(tokens_total / 1000, 0.001), 6)
+
+    tool_usage = defaultdict(int)
+    for date, day in daily.items():
+        for tool_name, count in day.get("tool_calls", {}).items():
+            tool_usage[tool_name] += count
+    top_tools = sorted(tool_usage.items(), key=lambda x: x[1], reverse=True)[:10]
+
+    channel_messages = defaultdict(int)
+    for date, day in daily.items():
+        day_msgs = day["messages"]["user"]
+        channels = day.get("channels", [])
+        if channels and day_msgs > 0:
+            per_ch = day_msgs / len(channels)
+            for ch in channels:
+                channel_messages[ch] += int(per_ch)
+
+    return {
+        "model_tokens": model_tokens,
+        "model_share": model_share,
+        "provider_tokens": provider_tokens,
+        "provider_share": provider_share,
+        "daily_trend": daily_trend,
+        "cache_hit_rate": cache_hit_rate,
+        "cache_read_total": cache_read_total,
+        "tokens_total": tokens_total,
+        "tokens_input": totals.get("tokens_input", 0),
+        "tokens_output": totals.get("tokens_output", 0),
+        "cost_total": round(cost_total, 4),
+        "cost_input": round(totals.get("cost_input", 0), 4),
+        "cost_output": round(totals.get("cost_output", 0), 4),
+        "avg_cost_per_day": avg_cost_per_day,
+        "avg_tokens_per_msg": avg_tokens_per_msg,
+        "cost_per_1k_tokens": cost_per_1k_tokens,
+        "unique_models": totals.get("unique_models", []),
+        "unique_providers": totals.get("unique_providers", []),
+        "unique_channels": totals.get("unique_channels", []),
+        "top_tools": [{"name": n, "count": c} for n, c in top_tools],
+        "channel_messages": dict(channel_messages),
+        "active_days": active_days,
+        "total_sessions": totals.get("sessions", 0),
     }
 
 
@@ -553,6 +643,13 @@ def main():
     # Daily Quests
     quests = generate_daily_quests(daily, config, today)
 
+    # Usage Analytics
+    usage_analytics = calc_usage_analytics(metrics)
+    print(f"[score] Usage: {usage_analytics['tokens_total']:,} tokens, "
+          f"${usage_analytics['cost_total']:.4f}, "
+          f"{len(usage_analytics['unique_models'])} models, "
+          f"cache hit {usage_analytics['cache_hit_rate']}%")
+
     # Build badge list with tier info
     old_badges = {b["id"]: b for b in (existing or {}).get("badges", [])}
     badges = []
@@ -618,7 +715,8 @@ def main():
     save_json(DATA_DIR / "tasks.json", tasks)
     save_json(DATA_DIR / "check_ins.json", check_ins)
     save_json(DATA_DIR / "daily_quests.json", quests)
-    print("[score] Saved user_stats, tasks, check_ins, daily_quests")
+    save_json(DATA_DIR / "usage_analytics.json", usage_analytics)
+    print("[score] Saved user_stats, tasks, check_ins, daily_quests, usage_analytics")
 
     profile = build_public_profile(user_stats, metrics)
     save_json(DATA_DIR / "public_profile.json", profile)
