@@ -130,59 +130,58 @@
     const ctx = canvas.getContext("2d");
     const W = 600, H = 340;
 
-    const grad = ctx.createLinearGradient(0, 0, W, H);
-    grad.addColorStop(0, "#131F24");
-    grad.addColorStop(1, "#1a2a40");
-    ctx.fillStyle = grad;
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, W, H);
 
-    ctx.fillStyle = "rgba(88,204,2,.06)";
-    ctx.beginPath(); ctx.arc(100, 80, 200, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#d7ffb8";
+    ctx.fillRect(0, 0, W, 6);
 
     ctx.fillStyle = "#58CC02";
-    ctx.font = "bold 18px Inter, sans-serif";
-    ctx.fillText("🐾 ClawRecord", 30, 40);
+    ctx.font = "900 20px Inter, sans-serif";
+    ctx.fillText("🐾 ClawRecord", 30, 44);
 
-    ctx.fillStyle = "#AFAFBF";
-    ctx.font = "600 12px 'JetBrains Mono', monospace";
-    ctx.fillText(L().claw_power.toUpperCase(), 30, 80);
+    ctx.fillStyle = "#afafaf";
+    ctx.font = "700 11px Inter, sans-serif";
+    ctx.fillText(L().claw_power.toUpperCase(), 30, 78);
+
+    ctx.fillStyle = "#3c3c3c";
+    ctx.font = "900 54px Inter, sans-serif";
+    ctx.fillText(U.claw_power.toLocaleString(), 30, 136);
 
     ctx.fillStyle = "#58CC02";
-    ctx.font = "900 52px 'JetBrains Mono', monospace";
-    ctx.fillText(U.claw_power.toLocaleString(), 30, 138);
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "700 14px Inter, sans-serif";
+    ctx.font = "800 14px Inter, sans-serif";
     const { cur } = getLevelInfo();
-    ctx.fillText(`Lv.${U.level} ${t(cur.rank)}`, 30, 170);
+    ctx.fillText(`Lv.${U.level}  ${t(cur.rank)}`, 30, 166);
 
     const stats = [
       [`🔥 ${U.streak}`, L().streak],
       [`⚡ ${U.weekly_xp}`, L().weekly_xp],
       [`❤️ ${U.hp}`, L().hp],
     ];
-    ctx.font = "700 16px 'JetBrains Mono', monospace";
     stats.forEach(([val, label], i) => {
       const x = 30 + i * 180;
-      ctx.fillStyle = "#58CC02";
-      ctx.fillText(val, x, 220);
-      ctx.fillStyle = "#56687A";
-      ctx.font = "600 10px 'JetBrains Mono', monospace";
-      ctx.fillText(label, x, 238);
-      ctx.font = "700 16px 'JetBrains Mono', monospace";
+      ctx.fillStyle = "#3c3c3c";
+      ctx.font = "900 16px Inter, sans-serif";
+      ctx.fillText(val, x, 216);
+      ctx.fillStyle = "#afafaf";
+      ctx.font = "700 10px Inter, sans-serif";
+      ctx.fillText(label, x, 234);
     });
 
-    ctx.fillStyle = "#56687A";
-    ctx.font = "500 10px 'JetBrains Mono', monospace";
-    ctx.fillText(`@${U.username} • ${D.generated}`, 30, H - 20);
+    ctx.fillStyle = "#e5e5e5";
+    ctx.fillRect(30, 260, W - 60, 2);
+
+    ctx.fillStyle = "#afafaf";
+    ctx.font = "600 10px Inter, sans-serif";
+    ctx.fillText(`@${U.username}  •  ${D.generated}`, 30, H - 24);
 
     const { cur: leagueCur } = getLeagueInfo();
-    ctx.fillStyle = "#fff";
-    ctx.font = "600 13px Inter, sans-serif";
-    ctx.fillText(`${leagueCur.icon} ${t(leagueCur.name)} League`, W - 180, 40);
+    ctx.fillStyle = "#3c3c3c";
+    ctx.font = "700 12px Inter, sans-serif";
+    ctx.fillText(`${leagueCur.icon} ${t(leagueCur.name)}`, W - 140, 44);
 
     const badgeCount = U.badges ? U.badges.length : 0;
-    ctx.fillText(`🏅 ${badgeCount} Badges`, W - 180, 65);
+    ctx.fillText(`🏅 ${badgeCount} Badges`, W - 140, 66);
 
     return canvas.toDataURL("image/png");
   }
@@ -207,10 +206,10 @@
   </div>
 </div>
 <div class="stat-row">
-  <div class="stat-box"><div class="stat-val">${U.level}</div><div class="stat-key">${h(l.level)}</div></div>
-  <div class="stat-box"><div class="stat-val fire">🔥 <span class="counter" data-target="${U.streak}">0</span></div><div class="stat-key">${h(l.streak)}</div></div>
-  <div class="stat-box"><div class="stat-val heart">❤️ ${U.hp}</div><div class="stat-key">${h(l.hp)}</div></div>
-  <div class="stat-box"><div class="stat-val bolt">⚡ <span class="counter" data-target="${U.weekly_xp}">0</span></div><div class="stat-key">${h(l.weekly_xp)}</div></div>
+  <div class="stat-box"><div class="stat-val c-green">${U.level}</div><div class="stat-key">${h(l.level)}</div></div>
+  <div class="stat-box"><div class="stat-val c-gold">🔥 <span class="counter" data-target="${U.streak}">0</span></div><div class="stat-key">${h(l.streak)}</div></div>
+  <div class="stat-box"><div class="stat-val c-red">❤️ ${U.hp}</div><div class="stat-key">${h(l.hp)}</div></div>
+  <div class="stat-box"><div class="stat-val c-blue">⚡ <span class="counter" data-target="${U.weekly_xp}">0</span></div><div class="stat-key">${h(l.weekly_xp)}</div></div>
 </div>
 ${renderQuests()}
 <div class="foot">${h(l.updated)}: ${D.generated}</div>`;
