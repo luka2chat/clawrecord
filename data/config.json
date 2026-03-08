@@ -401,6 +401,51 @@
     "longest_streak": {"en": "Longest Streak",  "zh": "最长连胜"},
     "best_session":   {"en": "Longest Session", "zh": "最长对话"},
     "best_daily_tools": {"en": "Most Tools/Day", "zh": "单日最多工具"},
-    "power_per_level": {"en": "Power", "zh": "战力"}
+    "power_per_level": {"en": "Power", "zh": "战力"},
+
+    "share_to_x":     {"en": "Share to X", "zh": "分享到 X"},
+    "share_profile":  {"en": "Share Profile", "zh": "分享档案"},
+    "share_badge":    {"en": "Share Achievement", "zh": "分享成就"},
+    "share_record":   {"en": "Share Record", "zh": "分享纪录"},
+    "share_league":   {"en": "Share League", "zh": "分享联赛"},
+
+    "install_title":  {"en": "Quick Install", "zh": "快速安装"},
+    "install_desc":   {"en": "Get started with ClawRecord in 30 seconds", "zh": "30 秒快速安装 ClawRecord"},
+    "install_step1":  {"en": "Install the Hook", "zh": "安装 Hook"},
+    "install_step2":  {"en": "Collect & Score", "zh": "采集 & 计分"},
+    "install_step3":  {"en": "Deploy Dashboard", "zh": "部署面板"},
+
+    "onboarding_title":     {"en": "Your OpenClaw Journey", "zh": "你的 OpenClaw 之旅"},
+    "onboarding_desc":      {"en": "Level up from beginner to master", "zh": "从新手到大师的进阶之路"},
+    "path_beginner":        {"en": "Beginner", "zh": "新手入门"},
+    "path_beginner_desc":   {"en": "Learn the basics of OpenClaw", "zh": "学习 OpenClaw 基础操作"},
+    "path_intermediate":    {"en": "Intermediate", "zh": "进阶提升"},
+    "path_intermediate_desc": {"en": "Master tools and track your progress", "zh": "精通工具，记录你的成长"},
+    "path_advanced":        {"en": "Advanced", "zh": "资深玩家"},
+    "path_advanced_desc":   {"en": "Compete on the global leaderboard", "zh": "在全球排行榜上一决高下"},
+
+    "path_tasks_beginner":  {
+      "en": ["Send your first message", "Use a tool call", "Complete a session", "Unlock first achievement", "Reach Level 3"],
+      "zh": ["发送第一条消息", "使用一次工具调用", "完成一次会话", "解锁第一个成就", "达到等级 3"]
+    },
+    "path_tasks_intermediate": {
+      "en": ["Build a 7-day streak", "Reach Gold league", "Unlock 10 achievements", "Master a skill to Lv.5", "Deploy your dashboard"],
+      "zh": ["连续打卡 7 天", "进入黄金联赛", "解锁 10 个成就", "一项技能升至 Lv.5", "部署你的仪表盘"]
+    },
+    "path_tasks_advanced": {
+      "en": ["Join the global leaderboard", "Reach Diamond league", "Earn a Legend badge", "30-day streak", "Share your profile on X"],
+      "zh": ["加入全球排行榜", "进入钻石联赛", "获得传奇徽章", "连续打卡 30 天", "分享你的档案到 X"]
+    },
+
+    "leaderboard_title":    {"en": "Global Leaderboard", "zh": "全球排行榜"},
+    "leaderboard_desc":     {"en": "Compete with OpenClaw users worldwide", "zh": "与全球 OpenClaw 用户一决高下"},
+    "join_leaderboard":     {"en": "Join the Leaderboard", "zh": "加入排行榜"},
+    "your_rank":            {"en": "Your Rank", "zh": "你的排名"},
+    "league_progress":      {"en": "League Progress", "zh": "联赛进度"},
+    "next_league":          {"en": "Next League", "zh": "下一联赛"},
+    "promotion_zone":       {"en": "Promotion Zone", "zh": "晋级区"},
+    "current_zone":         {"en": "Current", "zh": "当前"},
+
+    "usage_analytics":      {"en": "Usage Analytics", "zh": "使用分析"}
   }
 }
