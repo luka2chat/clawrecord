@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🎮 ClawRecord
+# 🐾 ClawRecord
+
+**Duolingo for your AI assistant — gamified OpenClaw tracking**
 
 [![GitHub stars](https://img.shields.io/github/stars/luka2chat/clawrecord?style=social)](https://github.com/luka2chat/clawrecord/stargazers)
 [![License](https://img.shields.io/github/license/luka2chat/clawrecord?color=blue)](LICENSE)
@@ -9,100 +11,71 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-3776AB?logo=python&logoColor=white)](https://python.org)
 [![Node.js](https://img.shields.io/badge/Node.js-16+-339933?logo=node.js&logoColor=white)](https://nodejs.org)
 
-**Gamified OpenClaw Tracking — XP, levels, achievements, global leaderboard**
-
 [English](./README.md) | [简体中文](./README_CN.md) | [Live Demo →](https://luka2chat.github.io/clawrecord/)
 
 </div>
 
 ---
 
-> 🕹️ Duolingo for your AI assistant — ClawRecord automatically tracks your [OpenClaw](https://github.com/openclaw/openclaw) usage and turns it into a gamified experience.
-
-**Your AI grows. You get the credit. No cheating allowed.**
+> **Your AI grows. You get the credit. ClawRecord automatically tracks your [OpenClaw](https://github.com/openclaw/openclaw) usage and turns it into XP, achievements, leagues, and a personal dashboard — all shareable to X.**
 
 ---
 
-## 📸 Screenshots
-
-<!-- TODO: Replace placeholders with actual screenshots/GIFs -->
-
-<div align="center">
-
-| Dashboard Overview | Achievement Wall | Activity Heatmap |
-|:---:|:---:|:---:|
-| ![Dashboard](https://via.placeholder.com/350x220/1a1a2e/e94560?text=Dashboard+Overview) | ![Achievements](https://via.placeholder.com/350x220/16213e/0f3460?text=Achievement+Wall) | ![Heatmap](https://via.placeholder.com/350x220/1a1a2e/53a653?text=Activity+Heatmap) |
-| XP, level, streak, HP at a glance | 47 achievements across 7 categories | 90-day visual activity map |
-
-| Skill Cards | League Ranking | Daily Quests |
-|:---:|:---:|:---:|
-| ![Skills](https://via.placeholder.com/350x220/0f3460/e94560?text=Skill+Cards) | ![League](https://via.placeholder.com/350x220/533483/e94560?text=League+Ranking) | ![Quests](https://via.placeholder.com/350x220/1a1a2e/f0a500?text=Daily+Quests) |
-| 6 skill trees with level progression | Bronze → Diamond competitive leagues | 3 daily challenges + combo bonus |
-
-</div>
-
-> 📌 **Screenshots coming soon** — Deploy your own instance and submit a screenshot PR!
-
----
-
-## ⚡ Quick Start
-
-> ⏱️ Estimated time: **~5 minutes**
-
-### Prerequisites
-
-Before you begin, make sure you have:
-- ✅ [OpenClaw](https://github.com/openclaw/openclaw) installed and running
-- ✅ Python 3.8+
-- ✅ Node.js 16+ (for the hook)
-- ✅ A GitHub account (for Pages deployment & leaderboard)
-
-### Step 1 — Install the Hook
+## 🚀 30-Second Quick Start
 
 ```bash
-# Copy hook to OpenClaw directory
+# 1. Clone into your OpenClaw directory
+git clone https://github.com/luka2chat/clawrecord.git
+cd clawrecord
+
+# 2. Install the hook
 cp -r hooks/clawrecord-hook ~/.openclaw/hooks/
+openclaw hooks enable clawrecord-hook && openclaw gateway restart
 
-# Enable the hook
-openclaw hooks enable clawrecord-hook
+# 3. Generate your dashboard
+python3 scripts/collect.py && python3 scripts/score.py && python3 scripts/generate_pages.py
 
-# Restart gateway to activate
-openclaw gateway restart
+# 4. Open it!
+open docs/index.html  # macOS, or xdg-open on Linux
 ```
 
-> ✅ **Verify:** Run `openclaw hooks list` — you should see `clawrecord-hook` with status `enabled`.
+That's it. Your personal ClawRecord dashboard is ready.
 
-### Step 2 — Collect & Score
+---
 
-```bash
-# Parse OpenClaw runtime data
-python3 scripts/collect.py
+## 🎮 For Every Type of Player
 
-# Calculate XP, levels, achievements
-python3 scripts/score.py
+ClawRecord adapts to your experience level with a guided learning path:
 
-# Generate dashboard pages
-python3 scripts/generate_pages.py
-```
+### 🌱 Beginners — Learn OpenClaw
 
-> ✅ **Verify:** Check `docs/index.html` exists and open it in your browser.
+| Step | What you'll learn | Reward |
+|:---:|:---|:---|
+| 1 | Send your first message | 🥚 First Steps badge |
+| 2 | Use a tool call | 🔧 Tool Wielder badge |
+| 3 | Complete a session | 👣 Session Runner badge |
+| 4 | Unlock your first achievement | ⭐ First star |
+| 5 | Reach Level 3 | 🐣 Apprentice Tamer rank |
 
-### Step 3 — Deploy to GitHub Pages
+### 🚀 Intermediate — Track & Grow
 
-```bash
-# Push to GitHub — the Action runs the pipeline daily
-git add . && git commit -m "init clawrecord" && git push
-```
+| Goal | How to get there | Reward |
+|:---:|:---|:---|
+| Build a 7-day streak | Use OpenClaw every day | 🔥 On Fire badge |
+| Reach Gold league | Earn 1,500+ weekly XP | 🥇 Gold league status |
+| Master a skill to Lv.5 | Focus on one skill area | 🧙 Skill specialist badge |
+| Unlock 10 achievements | Explore different features | 🏅 Achievement wall |
+| Deploy your dashboard | Push to GitHub Pages | 📊 Live personal dashboard |
 
-Then enable GitHub Pages in **Settings → Pages → Source: `docs/`**.
+### 👑 Advanced — Compete Globally
 
-> ✅ **Verify:** Visit `https://<your-username>.github.io/clawrecord/`
-
-### Step 4 — Join the Global Leaderboard
-
-Submit a PR to [clawrecord-leaderboard](https://github.com/luka2chat/clawrecord-leaderboard) to register your repo.
-
-> 🏆 Once merged, you'll appear on the global leaderboard!
+| Goal | How to get there | Reward |
+|:---:|:---|:---|
+| Join the global leaderboard | PR to clawrecord-leaderboard | 🌍 Global ranking |
+| Reach Diamond league | 40,000+ weekly XP | 💎 Diamond status |
+| Earn a Legend badge | Max out any achievement | ⭐⭐⭐⭐⭐ Legend tier |
+| 30-day streak | Consistent daily usage | 🔥 Unstoppable badge |
+| Share profile on X | Click share button | 📢 Social recognition |
 
 ---
 
@@ -116,49 +89,22 @@ Submit a PR to [clawrecord-leaderboard](https://github.com/luka2chat/clawrecord-
 | ⭐ **XP System** | Earn XP from messages, tool calls, multi-turn conversations, skill diversity |
 | 📈 **Level & Evolution** | Progress from 🥚 Novice Tamer to 👑 AI Overlord across 8 ranks |
 | 🔥 **Streak & HP** | Daily streak with freeze protection, health decay, and recovery mechanics |
-| 📋 **Daily Quests** | 3 rotating daily challenges + combo bonus for extra XP |
+| 📋 **Daily Quests** | 3 rotating daily challenges (Combo + Challenge + Streak) with bonus XP |
 
-### 🏅 Gamification & Progression
+### 🏅 Gamification & Social
 
 | Feature | Description |
 |:---|:---|
-| 🏆 **47 Achievements** | Milestones, streaks, skills, tools, efficiency, time-based, and special |
+| 🏆 **47 Achievements** | 21 badge types with up to 5 tiers each (Bronze → Legend) |
 | 🌳 **6 Skill Trees** | 💻 Coding · ✍️ Content · 🔍 Research · 💬 Communication · ⚙️ Automation · 📊 Data |
-| 🎖️ **5-Tier Badges** | Bronze → Silver → Gold → Diamond → Legend for every achievement |
-| ⬆️ **Claw Power** | Composite score combining XP, streak, badges, and skill levels |
-
-### 🌐 Social & Competition
-
-| Feature | Description |
-|:---|:---|
-| 🏟️ **League System** | 🟤 Bronze → 🥈 Silver → 🥇 Gold → 💠 Sapphire → 💎 Diamond (10 tiers) |
-| 🗺️ **Activity Heatmap** | 90-day visual activity map |
-| 🌍 **Global Leaderboard** | Decentralized via GitHub, zero infrastructure cost |
-| 🌏 **Multi-language** | English and Chinese (i18n) |
-
----
-
-## 🏆 Achievement Preview
-
-<div align="center">
-
-| Category | Achievements | Example |
-|:---|:---|:---|
-| 📍 **Milestone** | 👣 Session Runner · 💬 Messenger · 💰 Token Consumer | *"Centurion" — Complete 100 sessions* |
-| 🔥 **Streak** | 🔥 Streak Master | *"Legendary" — 90-day streak* |
-| 🧠 **Skill** | 🧙 Code Wizard · 📝 Wordsmith · 🌈 Renaissance Claw | *"Architect" — Coding skill level 8* |
-| 🔧 **Tool** | 🔧 Tool Wielder · 🗡️ Swiss Army Knife · 🖥️ Shell Commander · 🖊️ Author · 🌐 Web Explorer | *"Full Arsenal" — Use 15 different tools* |
-| 🚀 **Efficiency** | 🚀 Productivity Beast · 🏃 Marathon Runner | *"Unstoppable" — 200 messages in one day* |
-| ⏰ **Time** | 🦉 Night Owl · 🐦 Early Bird | *"Vampire" — 200 late-night messages* |
-| 🎁 **Special** | 📱 Telegram Pioneer · 📡 Multi-Channel · 🔬 Model Explorer · ⬆️ Level Master · 🔄 Comeback Kid | *"Omni-Channel" — Use 5 different channels* |
-
-</div>
+| 🏟️ **10-Tier Leagues** | 🟤 Bronze → 💎 Diamond with promotion tracking |
+| 🌍 **Global Leaderboard** | Decentralized via GitHub — zero infrastructure cost |
+| 🐦 **Share to X** | One-click sharing of profile, achievements, streaks, and records |
+| 🗺️ **Learning Path** | Guided journey from beginner to advanced with progress tracking |
 
 ---
 
 ## 📊 Level System
-
-<div align="center">
 
 | Level | Rank | Icon | XP Required |
 |:---:|:---|:---:|---:|
@@ -171,8 +117,6 @@ Submit a PR to [clawrecord-leaderboard](https://github.com/luka2chat/clawrecord-
 | 50 | AI Sage | 🧠 | 80,000 |
 | 100 | AI Overlord | 👑 | 200,000 |
 
-</div>
-
 ---
 
 ## 🏟️ League System
@@ -183,15 +127,20 @@ Submit a PR to [clawrecord-leaderboard](https://github.com/luka2chat/clawrecord-
 
 </div>
 
-Leagues are determined by your **weekly XP**. Compete with other ClawRecord users to climb the ranks!
+Leagues are determined by your **weekly XP**. The dashboard shows your progress toward the next league with a visual progress bar.
 
-| League | Weekly XP Required |
-|:---|---:|
-| 🟤 Bronze | 0 |
-| 🥈 Silver | 500 |
-| 🥇 Gold | 1,500 |
-| 💠 Sapphire | 3,000 |
-| 💎 Diamond | 40,000 |
+---
+
+## 🐦 Share to X
+
+ClawRecord includes one-click sharing to X (Twitter) throughout the dashboard:
+
+- **Profile share** — Your level, Claw Power, and rank
+- **League share** — Your current league and weekly XP
+- **Achievement share** — Your badge collection progress
+- **Record share** — Your personal best stats
+
+All share links include `#ClawRecord #OpenClaw` hashtags and Open Graph meta tags for rich link previews.
 
 ---
 
@@ -211,7 +160,7 @@ clawrecord/
 ├── scripts/
 │   ├── collect.py           # Data collection from OpenClaw runtime
 │   ├── score.py             # XP / achievement / level calculation engine
-│   ├── generate_pages.py    # Static dashboard generator
+│   ├── generate_pages.py    # Static dashboard generator (v3)
 │   └── utils.py             # Shared utilities
 ├── data/
 │   ├── config.json          # Game rules, levels, 47 achievements, leagues
@@ -220,9 +169,8 @@ clawrecord/
 │   ├── tasks.json           # Auto-detected daily tasks
 │   ├── check_ins.json       # Daily check-in records
 │   └── public_profile.json  # Public data for global leaderboard
-├── registry/                # Global leaderboard aggregator (separate repo)
 ├── docs/                    # Generated static dashboard
-└── .github/workflows/       # CI/CD pipeline
+└── .github/workflows/       # CI/CD pipeline (daily cron)
 ```
 
 ## 🛡️ Anti-Cheat
