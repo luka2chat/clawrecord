@@ -4,6 +4,26 @@
 (function () {
   "use strict";
 
+  const isElectron = typeof window.clawrecord !== "undefined";
+
+  if (isElectron && navigator.platform.includes("Mac")) {
+    document.body.classList.add("electron-mac");
+  }
+
+  if (typeof D === "undefined" || window._dataLoadFailed) {
+    if (isElectron && window._setupModule) {
+      window._setupModule.showSetup();
+      return;
+    }
+    document.getElementById("app").innerHTML =
+      '<div style="text-align:center;padding:60px 20px;color:#777">' +
+      '<div style="font-size:3rem;margin-bottom:12px">🐾</div>' +
+      '<h2 style="margin-bottom:8px">No Data Yet</h2>' +
+      "<p>Run the pipeline first:<br><code>python3 scripts/collect.py && python3 scripts/score.py && python3 scripts/generate_pages.py</code></p>" +
+      "</div>";
+    return;
+  }
+
   const $ = (s, p) => (p || document).querySelector(s);
   const $$ = (s, p) => [...(p || document).querySelectorAll(s)];
   const h = (s) => { s = s == null ? "" : String(s); return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
@@ -580,9 +600,14 @@ ${renderQuests()}
     const app = $("#app");
     const renderer = pages[tab] || pages.home;
 
+    const refreshBtn = isElectron
+      ? `<button class="topbar-btn" onclick="window._refreshData()" title="Refresh" id="refresh-btn">🔄</button>`
+      : "";
+
     const topbar = `<div class="topbar">
       <div class="topbar-brand">🐾 ClawRecord</div>
       <div class="topbar-r">
+        ${refreshBtn}
         <div class="lang-sw">
           <button class="${lang === "en" ? "active" : ""}" onclick="window._setLang('en')">EN</button>
           <button class="${lang === "zh" ? "active" : ""}" onclick="window._setLang('zh')">ZH</button>
@@ -623,6 +648,26 @@ ${renderQuests()}
     localStorage.setItem("cr-lang", lang);
     navigate(currentTab);
   };
+
+  /* ── Electron refresh ─────────────────── */
+  if (isElectron) {
+    window._refreshData = async function () {
+      const btn = document.getElementById("refresh-btn");
+      if (btn) { btn.textContent = "⏳"; btn.disabled = true; }
+      try {
+        const result = await window.clawrecord.refreshData();
+        if (result.success) {
+          window.location.reload();
+        } else {
+          if (btn) btn.textContent = "❌";
+          setTimeout(() => { if (btn) { btn.textContent = "🔄"; btn.disabled = false; } }, 2000);
+        }
+      } catch {
+        if (btn) btn.textContent = "❌";
+        setTimeout(() => { if (btn) { btn.textContent = "🔄"; btn.disabled = false; } }, 2000);
+      }
+    };
+  }
 
   /* ── Init ─────────────────────────────── */
   $$(".tab").forEach(tabEl => {
