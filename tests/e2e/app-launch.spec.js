@@ -53,6 +53,15 @@ test.describe("App Launch", () => {
     expect(count).toBe(5);
   });
 
+  test("should have sidebar navigation on desktop", async () => {
+    const sidebar = window.locator("#sidebar");
+    await expect(sidebar).toBeVisible();
+
+    const sidebarItems = window.locator("#sidebar .sb-item");
+    const count = await sidebarItems.count();
+    expect(count).toBe(5);
+  });
+
   test("should expose clawrecord API via preload", async () => {
     const hasApi = await window.evaluate(() => {
       return typeof window.clawrecord !== "undefined";

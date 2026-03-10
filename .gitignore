@@ -4,3 +4,6 @@ dist/
 *.tsbuildinfo
 .DS_Store
 Thumbs.db
+nul
+playwright-report/
+test-results/

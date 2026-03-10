@@ -24,14 +24,19 @@ test.afterAll(async () => {
   }
 });
 
-test.describe("Dashboard Tab Navigation", () => {
-  test("Home tab should be active by default", async () => {
-    const homeTab = window.locator('.tab[data-tab="home"]');
-    await expect(homeTab).toHaveClass(/active/);
+test.describe("Desktop Sidebar Navigation", () => {
+  test("sidebar should be visible on desktop", async () => {
+    const sidebar = window.locator("#sidebar");
+    await expect(sidebar).toBeVisible();
   });
 
-  test("should render topbar with brand name", async () => {
-    const brand = window.locator(".topbar-brand");
+  test("Home should be active by default", async () => {
+    const homeItem = window.locator('.sb-item[data-tab="home"]');
+    await expect(homeItem).toHaveClass(/active/);
+  });
+
+  test("should render sidebar brand", async () => {
+    const brand = window.locator(".sb-name");
     await expect(brand).toContainText("ClawRecord");
   });
 
@@ -43,62 +48,67 @@ test.describe("Dashboard Tab Navigation", () => {
     await expect(enBtn).toContainText("EN");
   });
 
-  test("should navigate to Quests tab", async () => {
-    await window.locator('.tab[data-tab="quests"]').click();
+  test("should navigate to Quests via sidebar", async () => {
+    await window.locator('.sb-item[data-tab="quests"]').click();
     await window.waitForTimeout(300);
 
-    const questsTab = window.locator('.tab[data-tab="quests"]');
-    await expect(questsTab).toHaveClass(/active/);
+    const questsItem = window.locator('.sb-item[data-tab="quests"]');
+    await expect(questsItem).toHaveClass(/active/);
 
     const content = await window.locator("#app").innerHTML();
     expect(content).toContain("Daily Quests");
   });
 
-  test("should navigate to Skills tab", async () => {
-    await window.locator('.tab[data-tab="skills"]').click();
+  test("should navigate to Skills via sidebar", async () => {
+    await window.locator('.sb-item[data-tab="skills"]').click();
     await window.waitForTimeout(300);
 
-    const skillsTab = window.locator('.tab[data-tab="skills"]');
-    await expect(skillsTab).toHaveClass(/active/);
+    const skillsItem = window.locator('.sb-item[data-tab="skills"]');
+    await expect(skillsItem).toHaveClass(/active/);
 
     const content = await window.locator("#app").innerHTML();
     expect(content).toContain("Skills");
   });
 
-  test("should navigate to Stats tab", async () => {
-    await window.locator('.tab[data-tab="stats"]').click();
+  test("should navigate to Stats via sidebar", async () => {
+    await window.locator('.sb-item[data-tab="stats"]').click();
     await window.waitForTimeout(300);
 
-    const statsTab = window.locator('.tab[data-tab="stats"]');
-    await expect(statsTab).toHaveClass(/active/);
+    const statsItem = window.locator('.sb-item[data-tab="stats"]');
+    await expect(statsItem).toHaveClass(/active/);
 
     const content = await window.locator("#app").innerHTML();
     expect(content).toContain("Analytics");
   });
 
-  test("should navigate to Profile tab", async () => {
-    await window.locator('.tab[data-tab="profile"]').click();
+  test("should navigate to Profile via sidebar", async () => {
+    await window.locator('.sb-item[data-tab="profile"]').click();
     await window.waitForTimeout(300);
 
-    const profileTab = window.locator('.tab[data-tab="profile"]');
-    await expect(profileTab).toHaveClass(/active/);
+    const profileItem = window.locator('.sb-item[data-tab="profile"]');
+    await expect(profileItem).toHaveClass(/active/);
 
     const content = await window.locator("#app").innerHTML();
     expect(content).toContain("Achievements");
   });
 
-  test("should navigate back to Home tab", async () => {
-    await window.locator('.tab[data-tab="home"]').click();
+  test("should navigate back to Home via sidebar", async () => {
+    await window.locator('.sb-item[data-tab="home"]').click();
     await window.waitForTimeout(300);
 
-    const homeTab = window.locator('.tab[data-tab="home"]');
-    await expect(homeTab).toHaveClass(/active/);
+    const homeItem = window.locator('.sb-item[data-tab="home"]');
+    await expect(homeItem).toHaveClass(/active/);
+  });
+
+  test("bottom tabs should be hidden on desktop", async () => {
+    const tabs = window.locator("#tabs");
+    await expect(tabs).toBeHidden();
   });
 });
 
 test.describe("Home Tab Content", () => {
   test.beforeAll(async () => {
-    await window.locator('.tab[data-tab="home"]').click();
+    await window.locator('.sb-item[data-tab="home"]').click();
     await window.waitForTimeout(300);
   });
 
@@ -132,7 +142,7 @@ test.describe("Home Tab Content", () => {
 
 test.describe("Language Switching", () => {
   test("should switch to Chinese", async () => {
-    await window.locator('.tab[data-tab="home"]').click();
+    await window.locator('.sb-item[data-tab="home"]').click();
     await window.waitForTimeout(300);
 
     await window.evaluate(() => window._setLang("zh"));
@@ -153,7 +163,7 @@ test.describe("Language Switching", () => {
 
 test.describe("Profile Tab Content", () => {
   test.beforeAll(async () => {
-    await window.locator('.tab[data-tab="profile"]').click();
+    await window.locator('.sb-item[data-tab="profile"]').click();
     await window.waitForTimeout(300);
   });
 

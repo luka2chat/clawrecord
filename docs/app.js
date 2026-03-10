@@ -214,6 +214,8 @@
     const mult = U.streak_multiplier > 1 ? `<span class="mult">🚀 x${U.streak_multiplier}</span>` : "";
 
     return `
+<div class="content-row home-row">
+<div class="content-col">
 <div class="hero">
   <div class="hero-avatar"><div class="hero-avatar-inner">${U.avatar || cur.icon}</div></div>
   <div class="hero-rank">${h(t(cur.rank))}</div>
@@ -231,7 +233,9 @@
   <div class="stat-box"><div class="stat-val c-red">❤️ ${U.hp}</div><div class="stat-key">${h(l.hp)}</div></div>
   <div class="stat-box"><div class="stat-val c-blue">⚡ <span class="counter" data-target="${U.weekly_xp}">0</span></div><div class="stat-key">${h(l.weekly_xp)}</div></div>
 </div>
+</div>
 ${renderQuests()}
+</div>
 <div class="foot">${h(l.updated)}: ${D.generated}</div>`;
   }
 
@@ -327,6 +331,7 @@ ${renderQuests()}
     }
 
     return `
+<div class="content-row">
 ${renderQuests()}
 <div class="section">
   <div class="section-title">🗺️ ${h(l.journey)}</div>
@@ -335,6 +340,7 @@ ${renderQuests()}
     ${pathNode(l.intermediate, l.intermediate_d, l.i_tasks, iChecks, "#FFC800", 1)}
     ${pathNode(l.advanced, l.advanced_d, l.a_tasks, aChecks, "#CE82FF", 2)}
   </div>
+</div>
 </div>`;
   }
 
@@ -383,6 +389,7 @@ ${renderQuests()}
     const hmCells = buildHeatmap();
 
     return `
+<div class="content-row">
 <div class="section">
   <div class="section-title">⚡ ${h(l.skills)}</div>
   <div class="skill-grid">${skillHtml}</div>
@@ -391,6 +398,7 @@ ${renderQuests()}
   <div class="section-title">🏆 ${h(l.league)} <span class="dim">${h(l.weekly_xp)}: ${U.weekly_xp.toLocaleString()}</span></div>
   <div class="league-track">${leagueItems}</div>
   ${leagueNext}
+</div>
 </div>
 <div class="section">
   <div class="section-title">📅 ${h(l.activity)}</div>
@@ -481,11 +489,16 @@ ${renderQuests()}
 <div class="section">
   <div class="section-title">📊 ${h(l.analytics)}</div>
   <div class="ana-grid">${statsGrid}</div>
+  <div class="ana-panels-row">
   ${barPanel("🤖 Models", A.model_share, A.model_tokens)}
   ${barPanel("☁️ Providers", A.provider_share, A.provider_tokens)}
+  </div>
+  <div class="ana-panels-row">
   ${sparkHtml ? `<div class="ana-panel"><div class="ana-panel-title">📈 Trend</div><div class="ana-spark">${sparkHtml}</div></div>` : ""}
   ${toolBars ? `<div class="ana-panel"><div class="ana-panel-title">🔧 Tools</div>${toolBars}</div>` : ""}
+  </div>
 </div>
+<div class="content-row">
 <div class="section">
   <div class="section-title">🥇 ${h(l.records)}</div>
   <div class="rec-grid">
@@ -498,6 +511,7 @@ ${renderQuests()}
 <div class="section">
   <div class="section-title">📋 ${h(l.recent)}</div>
   <div class="act-list">${actHtml}</div>
+</div>
 </div>`;
   }
 
@@ -597,6 +611,7 @@ ${renderQuests()}
     currentTab = tab;
     location.hash = tab;
     $$(".tab").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
+    $$(".sb-item").forEach(t => t.classList.toggle("active", t.dataset.tab === tab));
     const app = $("#app");
     const renderer = pages[tab] || pages.home;
 
@@ -616,6 +631,7 @@ ${renderQuests()}
     </div>`;
 
     app.innerHTML = topbar + renderer();
+    updateNavLabels();
     app.scrollTop = 0;
     window.scrollTo(0, 0);
 
@@ -669,9 +685,20 @@ ${renderQuests()}
     };
   }
 
+  function updateNavLabels() {
+    const l = L();
+    $$("#tabs [data-i18n], #sidebar [data-i18n]").forEach(el => {
+      const key = el.dataset.i18n;
+      if (l[key]) el.textContent = l[key];
+    });
+  }
+
   /* ── Init ─────────────────────────────── */
   $$(".tab").forEach(tabEl => {
     tabEl.addEventListener("click", () => navigate(tabEl.dataset.tab));
+  });
+  $$(".sb-item").forEach(item => {
+    item.addEventListener("click", () => navigate(item.dataset.tab));
   });
 
   const hash = location.hash.replace("#", "");

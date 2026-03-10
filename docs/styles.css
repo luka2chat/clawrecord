@@ -40,6 +40,7 @@
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --ease: cubic-bezier(.175,.885,.32,1.275);
   --tab-h: 60px;
+  --sidebar-w: 220px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -478,11 +479,109 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 .empty { color: var(--text-muted); text-align: center; padding: 16px; font-size: .8rem; }
 
 /* ═════════════════════════════════════════
+   SIDEBAR (Desktop Navigation)
+   ═════════════════════════════════════════ */
+#sidebar {
+  display: none; flex-direction: column;
+  width: var(--sidebar-w); flex-shrink: 0;
+  background: var(--white);
+  border-right: 2px solid var(--border);
+  height: 100vh; overflow-y: auto; z-index: 50;
+}
+.sb-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 18px; border-bottom: 2px solid var(--border);
+}
+.sb-logo { font-size: 1.8rem; }
+.sb-name { font-weight: 900; font-size: 1.05rem; color: var(--green); }
+.sb-nav {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 12px 10px; gap: 2px;
+}
+.sb-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; border: 2px solid transparent; background: none;
+  border-radius: var(--r-sm); cursor: pointer;
+  font-family: var(--font); font-size: .82rem; font-weight: 700;
+  color: var(--text-secondary); transition: all .15s;
+  text-align: left;
+}
+.sb-item:hover { background: var(--hover); color: var(--text); }
+.sb-item.active {
+  background: var(--green-bg); color: var(--green-dark);
+  border-color: var(--green);
+}
+.sb-item svg { width: 22px; height: 22px; flex-shrink: 0; }
+.sb-footer {
+  padding: 14px 18px; border-top: 2px solid var(--border);
+}
+.sb-version {
+  font-size: .65rem; color: var(--text-muted); font-weight: 600;
+}
+
+/* ═════════════════════════════════════════
+   LAYOUT HELPERS
+   ═════════════════════════════════════════ */
+.content-row {
+  display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;
+}
+.content-row > .section { margin-bottom: 0; }
+.content-col {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.content-col > .hero,
+.content-col > .stat-row { margin-bottom: 0; }
+.ana-panels-row {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+/* ═════════════════════════════════════════
    RESPONSIVE
    ═════════════════════════════════════════ */
-@media (min-width: 640px) {
-  #app { max-width: 540px; padding: 16px 20px 32px; }
-  .rec-grid { grid-template-columns: repeat(4,1fr); }
+
+/* ── Tablet / Small Desktop (768px+) ── */
+@media (min-width: 768px) {
+  body {
+    display: flex; flex-direction: row;
+    height: 100vh; overflow: hidden;
+    padding-bottom: 0;
+  }
+  #sidebar { display: flex; }
+  #tabs { display: none !important; }
+  #app {
+    flex: 1; max-width: none; overflow-y: auto;
+    padding: 24px 32px 40px; margin: 0;
+  }
+  .topbar-brand { display: none; }
+  .topbar { justify-content: flex-end; }
+  .skill-grid { grid-template-columns: repeat(3, 1fr); }
+  .rec-grid { grid-template-columns: repeat(4, 1fr); }
+  .stat-row { gap: 10px; }
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
+  .section { padding: 20px; }
+  .hero { padding: 28px 24px; }
+}
+
+/* ── Desktop (1024px+) ──────────────── */
+@media (min-width: 1024px) {
+  #app { padding: 28px 40px 48px; }
+  .content-row { flex-direction: row; align-items: flex-start; }
+  .content-row > * { flex: 1; min-width: 0; }
+  .home-row > .content-col { flex: 3; }
+  .home-row > .section { flex: 2; }
+  .ana-panels-row { flex-direction: row; }
+  .ana-panels-row > * { flex: 1; min-width: 0; }
+  .stat-row { gap: 12px; }
+  .section { padding: 22px; }
+}
+
+/* ── Wide Desktop (1280px+) ─────────── */
+@media (min-width: 1280px) {
+  #app { padding: 32px 48px 56px; }
+  .skill-grid { gap: 10px; }
+  .ana-grid { grid-template-columns: repeat(6, 1fr); }
+  .badge-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+  .section { padding: 24px; }
 }
 
 ::selection { background: var(--green-bg); color: var(--green-dark); }
@@ -620,3 +719,8 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
   padding-top: 36px;
 }
 .electron-mac #tabs { padding-bottom: 0; }
+
+@media (min-width: 768px) {
+  .electron-mac #sidebar .sb-brand { padding-top: 36px; }
+  .electron-mac #app { padding-top: 24px; }
+}

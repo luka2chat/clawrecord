@@ -107,9 +107,11 @@
     const screen = document.getElementById("setup-screen");
     const app = document.getElementById("app");
     const tabs = document.getElementById("tabs");
+    const sidebar = document.getElementById("sidebar");
     screen.style.display = "block";
     app.style.display = "none";
     tabs.style.display = "none";
+    if (sidebar) sidebar.style.display = "none";
 
     const l = L();
     screen.innerHTML = `
@@ -342,9 +344,11 @@
     const screen = document.getElementById("setup-screen");
     const app = document.getElementById("app");
     const tabs = document.getElementById("tabs");
+    const sidebar = document.getElementById("sidebar");
     screen.style.display = "none";
-    app.style.display = "block";
-    tabs.style.display = "flex";
+    app.style.display = "";
+    tabs.style.display = "";
+    if (sidebar) sidebar.style.display = "";
   }
 
   if (isElectron && window.clawrecord.onTriggerRefresh) {

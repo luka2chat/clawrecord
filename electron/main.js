@@ -21,10 +21,10 @@ let mainWindow = null;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 480,
-    height: 860,
-    minWidth: 380,
-    minHeight: 600,
+    width: 1100,
+    height: 750,
+    minWidth: 420,
+    minHeight: 500,
     title: "ClawRecord",
     backgroundColor: "#f7f7f7",
     webPreferences: {
