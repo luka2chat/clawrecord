@@ -14,7 +14,11 @@
     "collect": "python3 scripts/collect.py",
     "score": "python3 scripts/score.py",
     "generate": "python3 scripts/generate_pages.py",
-    "refresh": "python3 scripts/collect.py && python3 scripts/score.py && python3 scripts/generate_pages.py"
+    "refresh": "python3 scripts/collect.py && python3 scripts/score.py && python3 scripts/generate_pages.py",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "test:unit": "python3 -m pytest tests/unit/ -v",
+    "test:e2e": "npx playwright test",
+    "test:e2e:headed": "npx playwright test --headed"
   },
   "build": {
     "appId": "com.clawrecord.app",
@@ -130,7 +134,9 @@
   "author": "ClawRecord Team",
   "license": "MIT",
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "electron": "^40.8.0",
-    "electron-builder": "^26.8.1"
+    "electron-builder": "^26.8.1",
+    "playwright": "^1.58.2"
   }
 }
