@@ -50,12 +50,13 @@ body {
   line-height: 1.5; min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
   padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px) + 12px);
+  overflow-x: hidden;
 }
 
 a { color: var(--blue); text-decoration: none; font-weight: 600; }
 
 /* ── App Shell ──────────────────────────── */
-#app { max-width: 500px; margin: 0 auto; padding: 12px 16px 24px; }
+#app { max-width: 500px; width: 100%; margin: 0 auto; padding: 12px 16px 24px; overflow-x: hidden; }
 
 /* ── Tab Bar ────────────────────────────── */
 #tabs {
@@ -120,6 +121,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
   border-bottom: 4px solid var(--shadow);
   border-radius: var(--r); padding: 24px 20px;
   text-align: center; margin-bottom: 14px;
+  min-width: 0; overflow: hidden;
 }
 .hero-avatar {
   width: 72px; height: 72px; border-radius: 50%; margin: 0 auto 6px;
@@ -173,12 +175,13 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 /* ═════════════════════════════════════════
    STAT ROW — colored mini cards
    ═════════════════════════════════════════ */
-.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+.stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; min-width: 0; }
 .stat-box {
   background: var(--white); border-radius: var(--r-sm);
-  padding: 10px 6px; text-align: center;
+  padding: 10px 4px; text-align: center;
   border: 2px solid var(--border); border-bottom: 3px solid var(--shadow);
   transition: transform .15s var(--ease);
+  min-width: 0; overflow: hidden;
 }
 .stat-box:active { transform: scale(.96); }
 .stat-val { font-size: 1rem; font-weight: 900; }
@@ -198,6 +201,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
   background: var(--white); border-radius: var(--r);
   padding: 18px; margin-bottom: 12px;
   border: 2px solid var(--border); border-bottom: 4px solid var(--shadow);
+  min-width: 0; overflow: hidden;
 }
 .section-title {
   font-size: .82rem; font-weight: 800; margin-bottom: 14px;
@@ -284,7 +288,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 /* ═════════════════════════════════════════
    SKILL CARDS
    ═════════════════════════════════════════ */
-.skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.skill-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; min-width: 0; }
 .skill-group-hdr {
   grid-column: 1 / -1; font-size: .65rem; font-weight: 800; color: var(--text-secondary);
   text-transform: uppercase; letter-spacing: .06em;
@@ -295,13 +299,14 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
   padding: 12px; border: 2px solid var(--border);
   display: flex; flex-direction: column; gap: 4px;
   transition: transform .15s var(--ease), border-color .15s;
+  min-width: 0; overflow: hidden;
 }
 .skill:active { transform: scale(.97); }
 .skill:hover { border-color: var(--green); }
-.skill-top { display: flex; align-items: center; gap: 6px; }
+.skill-top { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .skill-emoji { font-size: 1.3rem; }
-.skill-name { font-weight: 700; font-size: .76rem; flex: 1; color: var(--text); }
-.skill-lvl { font-weight: 900; font-size: .72rem; color: var(--green); }
+.skill-name { font-weight: 700; font-size: .76rem; flex: 1; min-width: 0; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.skill-lvl { font-weight: 900; font-size: .72rem; color: var(--green); white-space: nowrap; flex-shrink: 0; }
 .skill-lvl span { color: var(--text-muted); font-weight: 600; }
 .skill-bar { height: 6px; border-radius: 3px; background: var(--border); overflow: hidden; border: 1px solid var(--border-strong); }
 .skill-bar-fill { height: 100%; border-radius: 2px; background: var(--green); transition: width .5s var(--ease); }
@@ -309,7 +314,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 /* ═════════════════════════════════════════
    LEAGUE
    ═════════════════════════════════════════ */
-.league-track { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; }
+.league-track { display: flex; gap: 4px; overflow-x: auto; padding: 4px 0; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .league-track::-webkit-scrollbar { display: none; }
 .league-item {
   flex: 0 0 auto; width: 46px; text-align: center; padding: 8px 4px;
@@ -336,7 +341,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 /* ═════════════════════════════════════════
    HEATMAP
    ═════════════════════════════════════════ */
-.heatmap { display: grid; grid-template-rows: repeat(7,1fr); grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; }
+.heatmap { display: grid; grid-template-rows: repeat(7,1fr); grid-auto-flow: column; grid-auto-columns: minmax(10px, 1fr); gap: 3px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .hm-cell { aspect-ratio: 1; border-radius: 3px; min-width: 0; transition: transform .1s; cursor: default; }
 .hm-cell:hover { transform: scale(1.5); z-index: 2; }
 .hm-0 { background: var(--border); }
@@ -524,10 +529,12 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
    ═════════════════════════════════════════ */
 .content-row {
   display: flex; flex-direction: column; gap: 12px; margin-bottom: 12px;
+  min-width: 0; max-width: 100%;
 }
 .content-row > .section { margin-bottom: 0; }
 .content-col {
   display: flex; flex-direction: column; gap: 14px;
+  min-width: 0; max-width: 100%;
 }
 .content-col > .hero,
 .content-col > .stat-row { margin-bottom: 0; }
@@ -549,12 +556,11 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
   #sidebar { display: flex; }
   #tabs { display: none !important; }
   #app {
-    flex: 1; max-width: none; overflow-y: auto;
-    padding: 24px 32px 40px; margin: 0;
+    flex: 1; max-width: none; overflow-y: auto; overflow-x: hidden;
+    padding: 24px 32px 40px; margin: 0; width: auto;
   }
   .topbar-brand { display: none; }
   .topbar { justify-content: flex-end; }
-  .skill-grid { grid-template-columns: repeat(3, 1fr); }
   .rec-grid { grid-template-columns: repeat(4, 1fr); }
   .stat-row { gap: 10px; }
   .badge-grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); }
@@ -578,7 +584,7 @@ a { color: var(--blue); text-decoration: none; font-weight: 600; }
 /* ── Wide Desktop (1280px+) ─────────── */
 @media (min-width: 1280px) {
   #app { padding: 32px 48px 56px; }
-  .skill-grid { gap: 10px; }
+  .skill-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
   .ana-grid { grid-template-columns: repeat(6, 1fr); }
   .badge-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
   .section { padding: 24px; }
