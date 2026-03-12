@@ -7,3 +7,6 @@ Thumbs.db
 nul
 playwright-report/
 test-results/
+
+# Separate project: cli-makevideo (own repo)
+cli-makevideo/
